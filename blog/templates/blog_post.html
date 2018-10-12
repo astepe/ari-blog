@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block current %}
+  <a style="font-family: courier new" class="nav-item nav-link" href="{{url_for('blog.view_blog')}}">Blog</a>
+  <a style="font-family: courier new" class="nav-item nav-link" href="{{url_for('portfolio.view_portfolio')}}">Projects</a>
+{% endblock %}
+
+
+{% block content %}
+  <h4>{{blog_post.date.strftime('%B %d, %Y')}}</h4>
+  <h2>{{blog_post.title}}</h2>
+  <p>{{blog_post.body}}</p>
+{% endblock %}

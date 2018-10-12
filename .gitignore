@@ -1,0 +1,8 @@
+*.sqlite
+*.jpg
+*.png
+*.pyc
+blog_poster.py
+blog_poster/
+
+txdthtx

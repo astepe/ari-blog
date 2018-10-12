@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block current %}
+  <a style="font-family: courier new" class="nav-item nav-link active" href="{{url_for('blog.view_blog')}}">Blog</a>
+  <a style="font-family: courier new" class="nav-item nav-link" href="{{url_for('portfolio.view_portfolio')}}">Projects</a>
+{% endblock %}
+
+{% block content %}
+<style type="text/css">
+       a:link {color: black;}      /* unvisited link */
+       a:visited {color: black;}   /* visited link */
+       a:hover {color: black;}     /* mouse over link */
+       a:active {color: black;}    /* selected link */
+</style>
+<style>
+
+  #post{
+    padding-top: 50px;
+  }
+  img{
+   width:300px; /*container-width*/
+   overflow:hidden; /*hide bounds of image */
+   margin:0;   /*reset margin of figure tag*/
+  }
+  img{
+     display:block; /*remove inline-block spaces*/
+     width:100%; /*make image streatch*/
+  }
+</style>
+
+  {% for post in posts %}
+  <br>
+  <h1 style="font-family: courier new" class="title"><a href="{{url_for('blog.view_blog_post', id=post.id)}}">{{post.title}}</a></h1>
+  <img class="card-img-top" src={{post.picture}} alt="Card image cap">
+  <p style="font-family: courier new" class="text-muted">{{post.date.strftime('%B %d, %Y')}}</p>
+  <p style="font-family: courier new" class="card-text">{{post.body}}</p>
+
+  <!--
+    {% if loop.index == 1 %}
+    <div id='post'>
+    {% else %}
+    <div>
+    {% endif %}
+    <div class="card mb-3">
+      <img class="card-img-top" src={{post.picture}} alt="Card image cap">
+      <div class="card-body">
+        <h5 class="card-title"><a style="text-decoration: none" href="{{url_for('blog.view_blog_post', id=post.id)}}">{{post.title}}</a></h5>
+        <p class="card-text">{{post.body}}</p>
+        <p class="card-text"><small class="text-muted">{{post.date.strftime('%B %d, %Y')}}</small></p>
+      </div>
+    </div>
+  </div>
+  -->
+
+  {% endfor %}
+
+{% endblock %}

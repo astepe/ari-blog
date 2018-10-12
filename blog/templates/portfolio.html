@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block current %}
+  <a style="font-family: courier new" class="nav-item nav-link" href="{{url_for('blog.view_blog')}}">Blog</a>
+  <a style="font-family: courier new" class="nav-item nav-link active" href="{{url_for('portfolio.view_portfolio')}}">Projects</a>
+{% endblock %}
+
+{% block content %}
+  <h3>This is my portfolio!</h3>
+  class Login:
+      """
+      login window
+      """
+
+      def __init__(self, login_master):
+
+          self.login_master = login_master
+          self.logo = PhotoImage(file=BASEDIR + "/blogposterlogo.png")
+          self.login_master.title('Login')
+
+          self.frame = ttk.Frame(self.login_master)
+
+          ttk.Label(self.frame, image=self.logo).pack()
+          self.username_label = ttk.Label(self.frame, text='Username', font='Courier 15', padding=3)
+          self.username_field = ttk.Entry(self.frame, font="Courier")
+
+          self.password_label = ttk.Label(self.frame, text='Password', font='Courier 15', padding=3)
+          self.password_field = ttk.Entry(self.frame, font="Courier")
+
+          self.login_button = ttk.Button(self.frame, text='Login', width=25, command=self.login)
+
+          self.username_label.pack()
+          self.username_field.pack()
+          self.password_label.pack()
+          self.password_field.pack()
+          self.login_button.pack()
+          self.frame.pack()</block>
+{% endblock %}
