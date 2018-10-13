@@ -8,7 +8,7 @@ import os
 from PIL import Image
 
 DEFAULT_PIC = '/static/pictures/python.png'
-basedir = '/home/ari/Desktop/Python_Projects/Ari_Blog/blog'
+basedir = ''
 
 @api.route('/blogposts/<int:id>', methods=['GET'])
 @token_auth.login_required
@@ -75,7 +75,6 @@ def update_blog_post(id):
         filename = blogpost.title.replace(' ', '_').lower() + '.' + ext_type
 
         if filename and allowed_file(filename):
-            print('HELLO!', basedir)
             image.save(basedir + '/static/pictures/' + filename)
 
         if blogpost.picture != DEFAULT_PIC:
