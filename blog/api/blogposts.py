@@ -4,7 +4,7 @@ from blog import db
 from blog.models import BlogPost
 from blog.api.errors import bad_request, not_found
 from blog.api.auth import token_auth
-import os
+import os, sys
 from blog.api.s3 import make_s3_signature
 
 from PIL import Image
@@ -77,6 +77,7 @@ def update_blog_post(id):
     if 'image' in data:
         signature = make_s3_signature(data['image'])
         print('image:', data['image'], 'signature:', signature)
+        sys.stdout.flush()
         data.update(signature)
 
     return jsonify(data)
