@@ -54,7 +54,6 @@ def create_blog_post():
 
     if 'image' in data:
         signature = make_s3_signature(data['image'])
-        print('printing image', data['image'], signature)
         data.update(signature)
 
     return jsonify(data)
@@ -77,6 +76,7 @@ def update_blog_post(id):
 
     if 'image' in data:
         signature = make_s3_signature(data['image'])
+        print('image:', data['image'], 'signature:', signature)
         data.update(signature)
 
     return jsonify(data)
