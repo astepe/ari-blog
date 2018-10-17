@@ -9,3 +9,6 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///' + os.path.join(basedir, 'data.sqlite')
     SQLALCHEMY_TRACK_MODIFICATIONS = os.environ.get('SQLALCHEMY_TRACK_MODIFICATIONS') or False
     UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER') or '/static/pictures/'
+    AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID') or 'AKIAIEUTP7VATUFFQ6VA'
+    AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY') or 'AUxpHFa9OuCYkMeKMupPHg7XA6O9uTzO'
+    S3_BUCKET_NAME = os.environ.get('S3_BUCKET_NAME')

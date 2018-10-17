@@ -5,6 +5,8 @@ from blog.models import BlogPost
 from blog.api.errors import bad_request, not_found
 from blog.api.auth import token_auth
 import os
+from blog.api.s3 import make_s3_signature
+
 from PIL import Image
 
 DEFAULT_PIC = '/static/pictures/python.png'
@@ -45,7 +47,15 @@ def create_blog_post():
 
     db.session.add(blogpost)
     db.session.commit()
+
     data['id'] = BlogPost.query.filter_by(title=data['title']).first().id
+
+    signature = {}
+
+    if 'image' in data:
+        signature = make_s3_signature(data['image'])
+        data.update(signature)
+
     return jsonify(data)
 
 
@@ -53,51 +63,20 @@ def create_blog_post():
 @token_auth.login_required
 def update_blog_post(id):
 
-    def allowed_file(filename):
-
-        ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
-
-        return '.' in filename and \
-        filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-    def picture_manager(**kwargs):
-
-        if 'file' in kwargs:
-
-            image = kwargs['file']
-            ext_type = image.filename.split('.')[-1]
-
-        else:
-
-            image = Image.open(basedir + blogpost.picture)
-            ext_type = blogpost.picture.split('.')[-1]
-
-        filename = blogpost.title.replace(' ', '_').lower() + '.' + ext_type
-
-        if filename and allowed_file(filename):
-            image.save(basedir + '/static/pictures/' + filename)
-
-        if blogpost.picture != DEFAULT_PIC:
-            os.remove(basedir + blogpost.picture)
-
-        blogpost.picture = basedir + '/static/pictures/' + filename
-
-
     data = request.get_json() or {}
     blogpost = BlogPost.query.get_or_404(id)
 
     if 'title' in data and blogpost.title != data['title']:
-
         blogpost.title = data['title']
-        picture_manager()
 
     if 'body' in data:
         blogpost.body = data['body']
 
-    if 'file' in request.files:
-        picture_manager(file=request.files['file'])
-
     db.session.commit()
+
+    if 'image' in data:
+        signature = make_s3_signature(data['image'])
+        data.update(signature)
 
     return jsonify(data)
 

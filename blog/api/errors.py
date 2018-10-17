@@ -15,3 +15,6 @@ def bad_request(message):
 
 def not_found(message):
     return error_response(404, message)
+
+def bad_file_type(message):
+    return error_response(415, message)
