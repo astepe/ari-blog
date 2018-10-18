@@ -12,7 +12,7 @@ class BlogPost(db.Model):
     title = db.Column(db.String(50), nullable=False)
     date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     body = db.Column(db.Text, nullable=False)
-    picture = db.Column(db.String(50), nullable=False, default='/static/pictures/python.png')
+    image = db.Column(db.String(100), nullable=False, default='https://s3.us-east-2.amazonaws.com/ari-blog-assets/python.png')
 
     def __repr__(self):
         return f'Title: {self.title}'

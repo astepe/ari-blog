@@ -2,6 +2,7 @@ alembic==0.9.6
 Babel==2.5.1
 bcrypt==3.1.4
 blinker==1.4
+boto3==1.9.26
 certifi==2017.7.27.1
 cffi==1.11.5
 chardet==3.0.4

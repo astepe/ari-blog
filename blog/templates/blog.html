@@ -31,7 +31,7 @@
   {% for post in posts %}
   <br>
   <h1 style="font-family: courier new" class="title"><a href="{{url_for('blog.view_blog_post', id=post.id)}}">{{post.title}}</a></h1>
-  <img class="card-img-top" src={{post.picture}} alt="Card image cap">
+  <img class="card-img-top" src={{post.image}} alt="Card image cap">
   <p style="font-family: courier new" class="text-muted">{{post.date.strftime('%B %d, %Y')}}</p>
   <p style="font-family: courier new" class="card-text">{{post.body}}</p>
 
@@ -42,7 +42,7 @@
     <div>
     {% endif %}
     <div class="card mb-3">
-      <img class="card-img-top" src={{post.picture}} alt="Card image cap">
+      <img class="card-img-top" src={{post.image}} alt="Card image cap">
       <div class="card-body">
         <h5 class="card-title"><a style="text-decoration: none" href="{{url_for('blog.view_blog_post', id=post.id)}}">{{post.title}}</a></h5>
         <p class="card-text">{{post.body}}</p>

@@ -23,7 +23,7 @@ def upgrade():
     sa.Column('title', sa.String(length=50), nullable=False),
     sa.Column('date', sa.DateTime(), nullable=False),
     sa.Column('body', sa.Text(), nullable=False),
-    sa.Column('picture', sa.String(length=50), nullable=False),
+    sa.Column('image', sa.String(length=50), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('projects',
