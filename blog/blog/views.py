@@ -1,10 +1,8 @@
-from flask import render_template, request, url_for, redirect, abort
+from flask import render_template, abort
 from blog.models import BlogPost
 from blog.blog import blog
-from blog import db
 
 
-@blog.route('/')
 @blog.route('/blog')
 def view_blog():
     posts = BlogPost.query.all()
@@ -15,6 +13,6 @@ def view_blog():
 def view_blog_post(id):
 
     blog_post = BlogPost.query.get(id)
-    if blog_post != None:
+    if blog_post is not None:
         return render_template('blog_post.html', blog_post=blog_post)
     abort(404)

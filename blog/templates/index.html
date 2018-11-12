@@ -5,9 +5,9 @@
 <div class="navlink"><a href="{{url_for('portfolio.view_portfolio')}}">Projects</a></div>
 {% endblock %}
 
-
 {% block content %}
-  <h4>{{blog_post.date.strftime('%B %d, %Y')}}</h4>
-  <h2>{{blog_post.title}}</h2>
-  <p>{{blog_post.body|blog_filter|safe}}</p>
+<div class="introduction">
+  <h1>Hi, I'm a Python programmer from New York.</h1>
+  <h3>I build backend web services and APIs.</h3>
+</div>
 {% endblock %}

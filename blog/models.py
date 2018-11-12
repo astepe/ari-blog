@@ -17,6 +17,7 @@ class BlogPost(db.Model):
     def __repr__(self):
         return f'Title: {self.title}'
 
+
 class Project(db.Model):
 
     __tablename__ = 'projects'
@@ -28,6 +29,7 @@ class Project(db.Model):
 
     def __repr__(self):
         return f'Title : {self.title}'
+
 
 class Token(db.Model):
 

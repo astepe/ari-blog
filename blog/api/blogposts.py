@@ -1,23 +1,30 @@
+import os
+import sys
+import boto3
+import mimetypes
 from flask import jsonify, request, current_app
 from blog.api import api
 from blog import db
 from blog.models import BlogPost
 from blog.api.errors import bad_request, not_found
 from blog.api.auth import token_auth
-import os, sys, boto3, mimetypes
 from PIL import Image
 
+
 DEFAULT_PIC = '/static/images/python.png'
-basedir = ''
+BASEDIR = ''
+
 
 @api.route('/blogposts/<int:id>', methods=['GET'])
 @token_auth.login_required
 def get_blogpost(id):
 
     post = BlogPost.query.get(id)
-    if post == None:
+    if post is None:
         return not_found('the post could not be found')
-    return jsonify({'id': post.id, 'title': post.title, 'body': post.body, 'date': post.date, 'image': post.image})
+    return jsonify({'id': post.id, 'title': post.title,
+                    'body': post.body, 'date': post.date,
+                    'image': post.image})
 
 
 @api.route('/blogposts', methods=['GET'])
@@ -28,7 +35,10 @@ def get_blogposts():
 
     list = []
     for post in posts:
-        list.append({'id': post.id, 'title': post.title, 'body': post.body, 'date': post.date, 'image': post.image})
+        list.append({'id': post.id, 'title': post.title,
+                     'body': post.body, 'date': post.date,
+                     'image': post.image})
+
     return jsonify(list)
 
 
@@ -42,8 +52,6 @@ def create_blog_post():
         return bad_request('must include title and body')
 
     blogpost = BlogPost(title=data['title'], body=data['body'])
-
-    print(data['title'])
 
     if 'image' in data:
         blogpost.image = data['image']
@@ -84,9 +92,11 @@ def delete_blog_post(id):
     blogpost = BlogPost.query.filter_by(id=id).first()
     if blogpost == 0:
         return not_found('the post could not be found')
+
     if blogpost.image != DEFAULT_PIC and \
-                            os.path.exists(basedir + blogpost.image):
-        os.remove(basedir + blogpost.image)
+       os.path.exists(BASEDIR + blogpost.image):
+
+        os.remove(BASEDIR + blogpost.image)
 
     db.session.delete(blogpost)
     db.session.commit()
@@ -115,14 +125,14 @@ def sign_s3(file_name):
             return bad_file_type('file type unsupported')
 
         presigned_post = s3.generate_presigned_post(
-            Bucket = S3_BUCKET_NAME,
-            Key = file_name,
-            Fields = {"acl": "public-read", "Content-Type": mime_type},
-            Conditions = [
+            Bucket=S3_BUCKET_NAME,
+            Key=file_name,
+            Fields={"acl": "public-read", "Content-Type": mime_type},
+            Conditions=[
               {"acl": "public-read"},
               {"Content-Type": mime_type}
             ],
-            ExpiresIn = 3600
+            ExpiresIn=3600
         )
 
         return jsonify({

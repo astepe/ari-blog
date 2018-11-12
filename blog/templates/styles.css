@@ -1,0 +1,67 @@
+.header-line {
+    background-color: #FFD43B;
+    width: 100%;
+    height: 7px;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+a:active, a:focus {
+    outline: 0;
+    border: none;
+    -moz-outline-style: none;
+}
+body {
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
+}
+.navbar{
+  display: grid;
+  grid-gap: 20px;
+  grid-row-gap: 5px;
+  grid-template-rows: 75px 5px;
+  grid-template-columns: 2fr repeat(4, auto);
+}
+.navlink {
+  /* We center the contents of these items. You can also do this with flexbox too! */
+  display: grid;
+  justify-content: center;
+  align-items: center;
+  font-size: 15px;
+  font-family: courier new;
+}
+.item p {
+  margin: 0 0 5px 0;
+}
+a {
+  text-decoration: none;
+  color: #646464;
+}
+a:hover {
+  color: #306998;
+}
+.header {
+  justify-content: left;
+  align-items: center;
+}
+.underline {
+  display: grid;
+  background-color: #306998;
+  grid-column: span 5;
+  grid-row-gap: 0px;
+}
+.header-title {
+  font-size: 20px;
+  font-family: courier new;
+  margin-bottom: 0;
+}
+.header-subtitle {
+  font-size: 15px;
+  font-family: courier new;
+  color: #4B8BBE;
+  margin-top: .25rem;
+}
+.introduction {
+  font-family: courier new;
+  display: grid;
+}
