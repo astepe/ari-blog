@@ -1,4 +1,7 @@
 from collections import namedtuple
+from pygments import highlight
+from pygments.lexers import PythonLexer
+from pygments.formatters import HtmlFormatter
 
 TAG = namedtuple('Tag', 'char index open void')
 
@@ -93,6 +96,14 @@ def insert_tags(states, string):
     for tag in states.tags:
 
         if tag.void is False:
+
+            if tag.char == '```':
+                if tag.open is False:
+                    html_text += highlight(string[prev:tag.index],
+                                           PythonLexer(),
+                                           HtmlFormatter())
+                prev = tag.index + len(tag.char)
+                continue
 
             if tag.open is True:
                 html_tag = HTML_TAGS[tag.char]['open']
