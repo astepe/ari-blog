@@ -55,8 +55,10 @@ def blog_filter(raw_text):
         else:
             filter.star_count, filter.tick_count = 0, 0
 
+    html = insert_tags(filter)
+
     if filter.tags:
-        return insert_tags(filter)
+        return html
     else:
         return raw_text
 
@@ -132,23 +134,29 @@ def insert_tags(filter):
 
                 html_text += raw_text[previous_tag_index:tag.index]
 
+                filter.open_states['code_block'] = True
+
             else:
 
                 escaped_text = remove_escapes(
                                filter.tags[tags_slice_start:current_index+1],
                                raw_text)
 
-                html_text += highlight(escaped_text, PythonLexer(), HtmlFormatter())
+                html_text += '</p></div>' + \
+                             highlight(escaped_text, PythonLexer(), HtmlFormatter()) + \
+                             '<div><p>'
 
-            previous_tag_index = tag.index + 3
+                filter.open_states['code_block'] = False
+
+            index_offset = 3
+
+            previous_tag_index = tag.index + index_offset
 
         else:
 
             html_tag = HTML_TAGS[tag.tag_type][tag.open]
 
-            if tag.tag_type == 'escape' and not filter.open_states['code_block']:
-                pass
-            else:
+            if not (tag.tag_type == 'escape' and filter.open_states['code_block']):
                 html_text += raw_text[previous_tag_index:tag.index] + html_tag
 
             if tag.tag_type == 'bold':
