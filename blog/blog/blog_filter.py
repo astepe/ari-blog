@@ -3,23 +3,23 @@ from pygments import highlight
 from pygments.lexers import PythonLexer
 from pygments.formatters import HtmlFormatter
 
-TAG = namedtuple('Tag', 'tag_type index open')
-
-FORMAT_CHARS = {'_': 'italic', '`': 'code', '>': 'quote', '*': 'bold'}
-
-HTML_TAGS = {'italic': {True: '<span style="font-style: italic;">', False: '</span>'},
-             'quote': {True: '</p><blockquote><div class="quote-bar"></div>', False: '</blockquote><p>'},
-             'bold': {True: '<b>', False: '</b>'},
-             'code': {True: '<code>', False: '</code>'},
-             'escape': {True: '', False: ''}
-             }
-
 
 class Filter():
     """
     used for tracking the open and closed state of tags
     while determining tag locations within input text
     """
+
+    HTML_TAGS = {'italic': {True: '<span style="font-style: italic;">', False: '</span>'},
+                 'quote': {True: '</p><blockquote><div class="quote-bar"></div>', False: '</blockquote><p>'},
+                 'bold': {True: '<b>', False: '</b>'},
+                 'code': {True: '<code>', False: '</code>'},
+                 'escape': {True: '', False: ''}
+                 }
+
+    TAG = namedtuple('Tag', 'tag_type index open')
+
+    FORMAT_CHARS = {'_': 'italic', '`': 'code', '>': 'quote', '*': 'bold'}
 
     def __init__(self, string):
 
@@ -38,6 +38,154 @@ class Filter():
 
         self.text_list = list(string)
 
+        self.tags_slice_start = 0
+
+        self.html_text = ''
+
+    def inspect_char(self, tag_type, index):
+
+        within_code_block = self.open_states['code_block']
+        within_code_inline = self.open_states['code']
+        within_code = within_code_block or within_code_inline
+
+        if tag_type == 'bold':
+
+            self.count_bold()
+
+            if not within_code:
+
+                self.check_bold(index)
+
+        elif tag_type == 'code':
+
+            self.count_code()
+
+            if self.tick_count == 3:
+
+                self.check_escape('code_block', index-2, index-3)
+
+            elif not within_code_block:
+
+                self.check_code(index)
+
+        elif not within_code:
+
+            self.check_escape(tag_type, index, index-1)
+
+    def count_bold(self):
+
+        self.star_count += 1
+        self.tick_count = 0
+
+    def check_bold(self, index):
+
+        if self.star_count == 2:
+
+            self.check_escape('bold', index-1, index-2)
+
+    def count_code(self):
+
+        self.tick_count += 1
+        self.star_count = 0
+
+    def check_escape(self, tag_type, tag_index, escape_index):
+
+        if self.text_list[escape_index] == '\\':
+            self.make_tag('escape', escape_index)
+        else:
+            self.make_tag(tag_type, tag_index)
+
+    def check_code(self, index):
+
+        if self.tick_count == 1 and self.text_list[index+1] != '`':
+
+            self.check_escape('code', index, index-1)
+
+    def reset_counts(self):
+
+        self.star_count, self.tick_count = 0, 0
+
+    def make_tag(self, tag_type, index):
+
+        self.flip_state(tag_type)
+        tag = self.TAG(tag_type, index, self.open_states[tag_type])
+        self.tags.append(tag)
+        self.reset_counts()
+
+    def insert_tags(self):
+
+        previous_tag_index = 0
+
+        for current_index, tag in enumerate(self.tags):
+
+            if tag.tag_type == 'code_block':
+
+                self.preprocess_code_block(tag, previous_tag_index, current_index)
+
+            else:
+
+                html_tag = self.HTML_TAGS[tag.tag_type][tag.open]
+
+                escape_in_code_block = tag.tag_type == 'escape' and self.open_states['code_block']
+
+                if not escape_in_code_block:
+                    self.html_text += self.text[previous_tag_index:tag.index] + html_tag
+
+            previous_tag_index = tag.index + self.get_offset(tag.tag_type)
+
+        self.html_text += self.text[previous_tag_index:]
+
+        return self.html_text
+
+    def preprocess_code_block(self, tag, previous_tag_index, current_index):
+
+        if tag.open:
+
+            self.tags_slice_start = current_index
+
+            self.html_text += self.text[previous_tag_index:tag.index]
+
+        else:
+
+            escaped_text = self.remove_code_block_escapes(current_index)
+
+            self.html_text += '</p></div>' + \
+                              highlight(escaped_text, PythonLexer(), HtmlFormatter()) + \
+                              '<div><p>'
+
+        self.flip_state('code_block')
+
+    def remove_code_block_escapes(self, current_index):
+
+        escaped_text = ''
+
+        tags_slice = self.tags[self.tags_slice_start:current_index+1]
+
+        previous_index = tags_slice[0].index + 3
+
+        for tag in tags_slice:
+
+            if tag.tag_type == 'escape':
+                escaped_text += self.text[previous_index:tag.index]
+                previous_index = tag.index + 1
+
+        escaped_text += self.text[previous_index:tags_slice[-1].index]
+
+        return escaped_text
+
+    def flip_state(self, tag_type):
+
+        self.open_states[tag_type] = not self.open_states[tag_type]
+
+    def get_offset(self, tag_type):
+
+        if tag_type == 'code_block':
+            return 3
+        elif tag_type == 'bold':
+            return 2
+        else:
+            return 1
+
     def __repr__(self):
 
         return self.tags, self.text
@@ -49,140 +197,12 @@ def blog_filter(raw_text):
 
     for index, char in enumerate(filter.text_list):
 
-        if char in FORMAT_CHARS:
-            tag_type = FORMAT_CHARS[char]
-            count_char(tag_type, index, filter)
+        if char in filter.FORMAT_CHARS:
+            tag_type = filter.FORMAT_CHARS[char]
+            filter.inspect_char(tag_type, index)
         else:
-            filter.star_count, filter.tick_count = 0, 0
+            filter.reset_counts()
 
-    html = insert_tags(filter)
+    html = filter.insert_tags()
 
-    if filter.tags:
-        return html
-    else:
-        return raw_text
-
-
-def count_char(tag_type, index, filter):
-
-    within_code_block = filter.open_states['code_block']
-    within_code_inline = filter.open_states['code']
-    within_code = within_code_block or within_code_inline
-
-    if tag_type == 'bold':
-
-        filter.star_count += 1
-        filter.tick_count = 0
-
-        if filter.star_count == 2 and not within_code:
-            if filter.text_list[index-2] == '\\':
-                make_tag('escape', index-2, filter)
-            else:
-                make_tag(tag_type, index-1, filter)
-
-    elif tag_type == 'code':
-
-        filter.tick_count += 1
-        filter.star_count = 0
-
-        if filter.tick_count == 1 and filter.text_list[index+1] != '`':
-            if not within_code_block:
-                if filter.text_list[index-1] == '\\':
-                    make_tag('escape', index-1, filter)
-                else:
-                    make_tag(tag_type, index, filter)
-
-        elif filter.tick_count == 3:
-            if filter.text_list[index-3] == '\\':
-                make_tag('escape', index-3, filter)
-            else:
-                make_tag('code_block', index-2, filter)
-
-    elif not within_code:
-
-        if filter.text_list[index-1] == '\\':
-            make_tag('escape', index-1, filter)
-        else:
-            make_tag(tag_type, index, filter)
-
-
-def make_tag(tag_type, index, filter):
-
-    filter.open_states[tag_type] = not filter.open_states[tag_type]
-
-    tag = TAG(tag_type, index, filter.open_states[tag_type])
-    filter.tags.append(tag)
-
-    filter.star_count, filter.tick_count = 0, 0
-
-
-def insert_tags(filter):
-
-    raw_text = filter.text
-
-    html_text = ''
-
-    previous_tag_index = 0
-
-    for current_index, tag in enumerate(filter.tags):
-
-        if tag.tag_type == 'code_block':
-
-            if tag.open:
-
-                tags_slice_start = current_index
-
-                html_text += raw_text[previous_tag_index:tag.index]
-
-                filter.open_states['code_block'] = True
-
-            else:
-
-                escaped_text = remove_escapes(
-                               filter.tags[tags_slice_start:current_index+1],
-                               raw_text)
-
-                html_text += '</p></div>' + \
-                             highlight(escaped_text, PythonLexer(), HtmlFormatter()) + \
-                             '<div><p>'
-
-                filter.open_states['code_block'] = False
-
-            index_offset = 3
-
-            previous_tag_index = tag.index + index_offset
-
-        else:
-
-            html_tag = HTML_TAGS[tag.tag_type][tag.open]
-
-            if not (tag.tag_type == 'escape' and filter.open_states['code_block']):
-                html_text += raw_text[previous_tag_index:tag.index] + html_tag
-
-            if tag.tag_type == 'bold':
-                index_offset = 2
-            else:
-                index_offset = 1
-
-            previous_tag_index = tag.index + index_offset
-
-    html_text += raw_text[previous_tag_index:]
-
-    return html_text
-
-
-def remove_escapes(tags, raw_text):
-
-    escaped_text = ''
-
-    previous_index = tags[0].index + 3
-
-    for tag in tags:
-
-        if tag.tag_type == 'escape':
-            escaped_text += raw_text[previous_index:tag.index]
-            previous_index = tag.index + 1
-
-    escaped_text += raw_text[previous_index:tags[-1].index]
-
-    return escaped_text
+    return html
