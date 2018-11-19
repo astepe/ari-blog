@@ -23,8 +23,8 @@ def get_blogpost(id):
     if post is None:
         return not_found('the post could not be found')
     return jsonify({'id': post.id, 'title': post.title,
-                    'body': post.body, 'date': post.date,
-                    'image': post.image})
+                    'body': post.body, 'summary': post.summary,
+                    'date': post.date, 'image': post.image})
 
 
 @api.route('/blogposts', methods=['GET'])
@@ -36,8 +36,8 @@ def get_blogposts():
     list = []
     for post in posts:
         list.append({'id': post.id, 'title': post.title,
-                     'body': post.body, 'date': post.date,
-                     'image': post.image})
+                     'body': post.body, 'summary': post.summary,
+                     'date': post.date, 'image': post.image})
 
     return jsonify(list)
 
@@ -48,10 +48,10 @@ def create_blog_post():
 
     data = request.get_json() or {}
 
-    if 'title' not in data or 'body' not in data:
-        return bad_request('must include title and body')
+    if 'title' not in data or 'body' not in data or 'summary' not in data:
+        return bad_request('must include title, body and summary')
 
-    blogpost = BlogPost(title=data['title'], body=data['body'])
+    blogpost = BlogPost(title=data['title'], body=data['body'], summary=data['summary'])
 
     if 'image' in data:
         blogpost.image = data['image']
@@ -76,6 +76,9 @@ def update_blog_post(id):
 
     if 'body' in data:
         blogpost.body = data['body']
+
+    if 'summary' in data:
+        blogpost.summary = data['summary']
 
     if 'image' in data:
         blogpost.image = data['image']

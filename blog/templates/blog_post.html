@@ -7,7 +7,9 @@
 
 
 {% block content %}
-  <div><h4>{{blog_post.date.strftime('%B %d, %Y')}}</h4></div>
-  <div><h2>{{blog_post.title}}</h2></div>
-  <div><p>{{blog_post.body|blog_filter|safe}}</p></div>
+  <div class="blog">  
+    <div><h4>{{blog_post.date.strftime('%B %d, %Y')}}</h4></div>
+    <div><h2>{{blog_post.title}}</h2></div>
+    <div><p>{{blog_post.body|blog_filter|safe}}</p></div>
+  </div>
 {% endblock %}

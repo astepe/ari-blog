@@ -39,7 +39,7 @@ class Token(db.Model):
     token_expiration = db.Column(db.DateTime)
 
     # based on code from Miguel Grinberg's Flask Mega Tutorial
-    def make_token(self, expires_in=900):
+    def make_token(self, expires_in=10):
         now = datetime.utcnow()
         if self.token and self.token_expiration > now + timedelta(seconds=60):
             return self.token
