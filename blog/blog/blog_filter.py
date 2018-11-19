@@ -8,7 +8,7 @@ TAG = namedtuple('Tag', 'tag_type index open')
 FORMAT_CHARS = {'_': 'italic', '`': 'code', '>': 'quote', '*': 'bold'}
 
 HTML_TAGS = {'italic': {True: '<span style="font-style: italic;">', False: '</span>'},
-             'quote': {True: '</p><blockquote>', False: '</blockquote><p>'},
+             'quote': {True: '</p><blockquote><div class="quote-bar"></div>', False: '</blockquote><p>'},
              'bold': {True: '<b>', False: '</b>'},
              'code': {True: '<code>', False: '</code>'},
              'escape': {True: '', False: ''}

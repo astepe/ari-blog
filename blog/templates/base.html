@@ -103,23 +103,31 @@
     line-height: 1.6;
   }
   blockquote {
+    display: grid;
+    grid-template-columns: 7px auto;
+    grid-column-gap: 15px;
     font-family: Avant Garde, Avantgarde, Century Gothic, CenturyGothic, AppleGothic, sans-serif;
     font-style: italic;
     font-variant: normal;
     font-weight: 400;
     line-height: 30px;
-    margin: 40px;
-    color: #999;
+    margin-right: 40px;
+    margin-top: 40px;
+    margin-bottom: 40px;
+    margin-left: 0px;
   }
-blockquote::before {
-content: “\201C”;
-display: block;
-font-size: 20px;
-height: 0;
-left: -20px;
-position: relative;
-top: -10px;
-}
+  blockquote::before {
+    content: “\201C”;
+    display: block;
+    font-size: 20px;
+    height: 0;
+    left: -20px;
+    position: relative;
+    top: -10px;
+  }
+  .quote-bar {
+    background-color: #306998;
+  }
   .highlight {
     display: grid;
     grid-template-columns: 1fr;
