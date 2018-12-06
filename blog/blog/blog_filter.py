@@ -7,8 +7,7 @@ import re
 
 class Filter():
     """
-    used for tracking the open and closed state of tags
-    while determining tag locations within input text
+    markdown to html interpreter
     """
 
     HTML_TAGS = {
@@ -40,44 +39,82 @@ class Filter():
                         True: '</li><li>',
                         False: '</li><li>',
                     },
+                    'heading1': {
+                        True: '</p><h1>',
+                        False: '</h1><p>',
+                    },
+                    'heading2': {
+                        True: '</p><h2>',
+                        False: '</h2><p>',
+                    },
+                    'heading3': {
+                        True: '</p><h3>',
+                        False: '</h3><p>',
+                    },
+                    'heading4': {
+                        True: '</p><h4>',
+                        False: '</h4><p>',
+                    },
+                    'heading5': {
+                        True: '</p><h5>',
+                        False: '</h5><p>',
+                    },
+                    'heading6': {
+                        True: '</p><h6>',
+                        False: '</h6><p>',
+                    },
+                    'horizontal_rule': {
+                        True: '</p><hr /><p>',
+                        False: '</p><hr /><p>',
+                    },
+                    'line_break': {
+                        True: '</p><br /><p>',
+                        False: '</p><br /><p>',
+                    },
                     'escape': {
                         True: '',
                         False: '',
                     },
                 }
 
-    TAG = namedtuple('Tag', 'type index index_offset open')
+    TAG = namedtuple('Tag', 'name start end open')
 
-    MARKUP_TAGS = {
-                    '_': 'italic',
-                    '>': 'quote',
-                    '**': 'bold',
-                    '`': 'code',
-                    '\n': 'new_line',
-                    '```': 'code_block',
-                    }
+    TAG_NAMES = {
+                '_': 'italic',
+                '>': 'quote',
+                '**': 'bold',
+                '`': 'code',
+                '\n': 'new_line',
+                '\n\n': 'line_break',
+                '```': 'code_block',
+                '\n# ': 'heading1',
+                '\n## ': 'heading2',
+                '\n### ': 'heading3',
+                '\n#### ': 'heading4',
+                '\n##### ': 'heading5',
+                '\n###### ': 'heading6',
+                '\n---': 'horizontal_rule',
+                '\n* ': 'unordered_list',
+                }
 
-    FORMAT_CHARS = {'_', '>', '*', '`', '\n'}
+    FORMAT_CHARS = {'_', '>', '*', '`', '\n', }
 
     def __init__(self, string):
 
         self.tags = []
 
-        self.open_states = {
-                            'italic': False,
-                            'quote': False,
-                            'bold': False,
-                            'code': False,
-                            'code_block': False,
-                            'escape': False,
-                            'ordered_list': False,
-                            'unordered_list': False,
-                            'list_item': False,
+        self.open_states = {name: False for name, _ in self.HTML_TAGS.items()}
+
+        self.open_states['code_block'] = False
+
+        self.char_counts = {
+                            '*': 0,
+                            '`': 0,
                             }
 
-        self.star_count, self.tick_count = 0, 0
-
         self.text = string
+
+        self.text_start = 0
 
         self.text_list = list(string)
 
@@ -85,158 +122,221 @@ class Filter():
 
         self.html_text = ''
 
-    def inspect_char(self, format_char, index):
+        self.new_line_matches = {
+                        'ordered_list': re.compile(r'\n[0-9]*\. '),
+                        'unordered_list': re.compile(r'\n\* '),
+                        'line_break': re.compile(r'\n\n'),
+                        'heading1': re.compile(r'\n# '),
+                        'heading2': re.compile(r'\n#{2} '),
+                        'heading3': re.compile(r'\n#{3} '),
+                        'heading4': re.compile(r'\n#{4} '),
+                        'heading5': re.compile(r'\n#{5} '),
+                        'heading6': re.compile(r'\n#{6} '),
+                        'horizontal_rule': re.compile(r'\n---'),
+                        }
+
+    def filter_text(self):
+
+        for index, char in enumerate(self.text_list):
+
+            if char in self.FORMAT_CHARS:
+                self.identify_markdown(char, index)
+            else:
+                self.reset_counts()
+
+        return self.scan_tags()
+
+    def identify_markdown(self, format_char, index):
 
         within_code_block = self.open_states['code_block']
         within_code_inline = self.open_states['code']
         within_code = within_code_block or within_code_inline
 
-        if format_char == '\n':
+        counted_char_checks = []
 
-            if not within_code:
+        tag_parameters = None
 
-                self.check_list(index)
+        if not within_code:
 
-        elif format_char == '*':
+            if format_char == '\n':
 
-            self.count_star()
+                new_line_tag = self.check_new_line(index)
 
-            if not within_code:
+                if new_line_tag:
 
-                self.check_bold(index)
+                    tag_name, markdown_tag = new_line_tag[0], new_line_tag[1]
 
-        elif format_char == '`':
+                    _ = self.check_new_line_states(tag_name, index)
+                    if _:
+                        tag_name = _
 
-            self.count_tick()
+                    tag_parameters = self.generate_tag_parameters(markdown_tag,
+                                                                  index + len(markdown_tag) - 1,
+                                                                  tag_name=tag_name)
 
-            if self.tick_count == 3:
+            elif format_char == '*':
 
-                self.check_escape('```', index-2, index-3)
+                counted_char_checks = ['bold']
 
-            elif not within_code_block:
+            elif format_char == '`':
 
-                self.check_code(index)
+                counted_char_checks = ['code', 'code_block']
 
-        elif not within_code:
-
-            self.check_escape(format_char, index, index-1)
-
-    def check_bold(self, index):
-
-        if self.star_count == 2:
-
-            self.check_escape('**', index-1, index-2)
-
-    def check_code(self, index):
-
-        if self.tick_count == 1 and self.text_list[index+1] != '`':
-
-            self.check_escape('`', index, index-1)
-
-    def check_list(self, index):
-
-        within_ol = self.open_states['ordered_list']
-        within_ul = self.open_states['unordered_list']
-
-        ol_start = re.compile(r'\n[0-9]*\. ')
-        ul_start = re.compile(r'\n\* ')
-        list_end = re.compile(r'\n\n')
-
-        ol_start_match = ol_start.match(self.text[index:])
-        ul_start_match = ul_start.match(self.text[index:])
-        list_end_match = list_end.match(self.text[index:])
-
-        if ol_start_match:
-
-            index_offset = len(ol_start_match[0])
-
-            if within_ol:
-                self.make_tag('list_item', index, index_offset)
             else:
-                self.make_tag('ordered_list', index, index_offset)
+                tag_parameters = self.generate_tag_parameters(format_char, index)
 
-        elif ul_start_match:
+        elif within_code_block:
 
-            if within_ul:
-                self.make_tag('list_item', index, 3)
+            if format_char == '`':
+
+                counted_char_checks = ['code_block']
+
+        elif within_code_inline:
+
+            if format_char == '`':
+
+                counted_char_checks = ['code']
+
+        if counted_char_checks:
+
+            self.count_char(format_char)
+            counted_char_tag = self.check_counted_char(index,
+                                                       checks=counted_char_checks)
+            if counted_char_tag:
+                tag_parameters = self.generate_tag_parameters(counted_char_tag,
+                                                              index)
+
+        if tag_parameters:
+
+            self.make_tag(*tag_parameters)
+            self.reset_counts()
+
+    def check_counted_char(self, index, checks=[]):
+
+        if 'bold' in checks:
+            if self.char_counts['*'] == 2:
+                return '**'
+        if 'code' in checks:
+            if self.char_counts['`'] == 1 and self.text_list[index+1] != '`':
+                return '`'
+        if 'code_block' in checks:
+            if self.char_counts['`'] == 3:
+                return '```'
+
+    def count_char(self, input_char):
+
+        for char, _ in self.char_counts.items():
+            if char == input_char:
+                self.char_counts[char] += 1
             else:
-                self.make_tag('unordered_list', index, 3)
+                self.char_counts[char] = 0
 
-        elif list_end_match:
+    def generate_tag_parameters(self, markdown_tag, index, tag_name=None):
 
-            if within_ul:
-                self.make_tag('unordered_list', index, 2)
-            elif within_ol:
-                self.make_tag('ordered_list', index, 2)
+        if tag_name is None:
+            tag_name = self.TAG_NAMES[markdown_tag]
 
-    def count_tick(self):
+        tag_length = len(markdown_tag)
+        tag_escaped = self.text_list[index-tag_length] == '\\'
 
-        self.tick_count += 1
-        self.star_count = 0
-
-    def count_star(self):
-
-        self.star_count += 1
-        self.tick_count = 0
-
-    def check_escape(self, markup_tag, tag_index, escape_index):
-
-        if self.text_list[escape_index] == '\\':
-            self.make_tag('escape', escape_index, 1)
+        if not tag_escaped:
+            return (tag_name, index-tag_length+1, index+1)
         else:
-            tag_type = self.MARKUP_TAGS[markup_tag]
-            self.make_tag(tag_type, tag_index, len(markup_tag))
+            return ('escape', index-tag_length, index-tag_length+1)
+
+    def check_new_line(self, tag_start):
+
+        slice = self.text[tag_start:]
+
+        found_match = None
+
+        for name, regex in self.new_line_matches.items():
+            match = regex.match(slice)
+            if match:
+                return name, match[0]
+
+    def check_new_line_states(self, tag_name, tag_start):
+
+        if tag_name == 'ordered_list':
+            if self.open_states['ordered_list']:
+                return 'list_item'
+
+        elif tag_name == 'unordered_list':
+            if self.open_states['unordered_list']:
+                return 'list_item'
+
+        if tag_name == 'line_break':
+            if self.open_states['ordered_list']:
+                return 'ordered_list'
+            elif self.open_states['unordered_list']:
+                return 'unordered_list'
+            elif self.text_list[tag_start-1] != '\n':
+                return 'line_break'
+            for name, open in self.open_states.items():
+                if name.startswith('heading') and open:
+                    return name
 
     def reset_counts(self):
 
-        self.star_count, self.tick_count = 0, 0
+        for char, _ in self.char_counts.items():
+            self.char_counts[char] = 0
 
-    def make_tag(self, tag_type, index, index_offset):
+    def make_tag(self, name, start, end):
 
-        self.flip_tag_open_state(tag_type)
-        tag = self.TAG(tag_type, index, index_offset, self.open_states[tag_type])
+        self.flip_tag_open_state(name)
+        tag = self.TAG(name, start, end, self.open_states[name])
         self.tags.append(tag)
-        self.reset_counts()
 
-    def insert_tags(self):
+    def flip_tag_open_state(self, name):
 
-        previous_tag_index = 0
+        self.open_states[name] = not self.open_states[name]
 
-        for current_index, tag in enumerate(self.tags):
+    def scan_tags(self):
 
-            if tag.type == 'code_block':
+        for tag_list_index, tag in enumerate(self.tags):
 
-                self.preprocess_code_block(tag, previous_tag_index, current_index)
+            if tag.name == 'code_block':
+
+                self.preprocess_code_block(tag, tag_list_index)
 
             else:
 
-                if tag.type == 'ordered_list' and tag.open:
-                    _num = self.text[tag.index+1:tag.index_offset-2]
-                    self.HTML_TAGS['ordered_list'][True] = f'</p><ol start="{_num}"><li>'
-                html_tag = self.HTML_TAGS[tag.type][tag.open]
+                self.insert_tag(tag)
 
-                escape_in_code_block = tag.type == 'escape' and self.open_states['code_block']
+            self.text_start = tag.end
 
-                if not escape_in_code_block:
-                    self.html_text += self.text[previous_tag_index:tag.index] + html_tag
-
-            previous_tag_index = tag.index + tag.index_offset
-
-        self.html_text += self.text[previous_tag_index:]
+        self.html_text += self.text[self.text_start:]
 
         return self.html_text
 
-    def preprocess_code_block(self, tag, previous_tag_index, current_index):
+    def insert_tag(self, tag):
+
+        if tag.name == 'ordered_list' and tag.open:
+            self.set_list_start_num(tag)
+
+        html_tag = self.HTML_TAGS[tag.name][tag.open]
+
+        escape_in_code_block = tag.name == 'escape' and self.open_states['code_block']
+
+        if not escape_in_code_block:
+            self.html_text += self.text[self.text_start:tag.start] + html_tag
+
+    def set_list_start_num(self, tag):
+
+        _num = self.text[tag.start+1:tag.end-2]
+        self.HTML_TAGS['ordered_list'][True] = f'</p><ol start="{_num}"><li>'
+
+    def preprocess_code_block(self, tag, tag_list_index):
 
         if tag.open:
 
-            self.tags_slice_start = current_index
+            self.tags_slice_start = tag_list_index
 
-            self.html_text += self.text[previous_tag_index:tag.index]
+            self.html_text += self.text[self.text_start:tag.start]
 
         else:
 
-            escaped_text = self.remove_code_block_escapes(current_index)
+            escaped_text = self.remove_code_block_escapes(tag_list_index)
 
             self.html_text += '</p></div>' + \
                               highlight(escaped_text, PythonLexer(), HtmlFormatter()) + \
@@ -244,27 +344,24 @@ class Filter():
 
         self.flip_tag_open_state('code_block')
 
-    def remove_code_block_escapes(self, current_index):
+    def remove_code_block_escapes(self, tag_list_index):
 
         escaped_text = ''
 
-        tags_slice = self.tags[self.tags_slice_start:current_index+1]
+        tags_slice = self.tags[self.tags_slice_start:tag_list_index+1]
 
-        previous_index = tags_slice[0].index + 3
+        previous_index = tags_slice[0].start + 3
 
         for tag in tags_slice:
 
-            if tag.type == 'escape':
-                escaped_text += self.text[previous_index:tag.index]
-                previous_index = tag.index + 1
+            if tag.name == 'escape':
+                escaped_text += self.text[previous_index:tag.start]
+                previous_index = tag.start + 1
 
-        escaped_text += self.text[previous_index:tags_slice[-1].index]
+        escaped_text += self.text[previous_index:tags_slice[-1].start]
 
         return escaped_text
 
-    def flip_tag_open_state(self, type):
-
-        self.open_states[type] = not self.open_states[type]
 
     def __repr__(self):
 
@@ -275,13 +372,6 @@ def blog_filter(raw_text):
 
     filter = Filter(raw_text)
 
-    for index, char in enumerate(filter.text_list):
-
-        if char in filter.FORMAT_CHARS:
-            filter.inspect_char(char, index)
-        else:
-            filter.reset_counts()
-
-    html = filter.insert_tags()
+    html = filter.filter_text()
 
     return html

@@ -2,8 +2,7 @@ import os
 
 
 class Config(object):
-    # value sourced from environment variable is preferred,
-    # but if not defined by environment, hardcoded key is used
+
     SECRET_KEY = os.environ.get('APP_SECRET_KEY')
     BASEDIR = os.path.abspath(os.path.dirname(__file__))
     SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
