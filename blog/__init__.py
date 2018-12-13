@@ -18,14 +18,14 @@ def create_app(config_class=Config):
     from blog import models
 
     from blog.home import home
-    from blog.portfolio import portfolio
+    from blog.projects import projects
     from blog.blog import blog
     from blog.error_pages import error_pages
     from blog.api import api
 
     app.register_blueprint(home)
     app.register_blueprint(blog)
-    app.register_blueprint(portfolio)
+    app.register_blueprint(projects)
     app.register_blueprint(error_pages)
     app.register_blueprint(api, url_prefix='/api')
 

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Form for inputting an sds pdf for parsing</title>
+    <script src="http://code.jquery.com/jquery-1.8.3.min.js"></script>
+    <script>
+    $(document).ready(function() {
+      var form = document.getElementById('form');
+      var submitButton = document.getElementById('submit');
+      var url = "{{ url_for('projects.submit_sds') }}";
+
+      form.onsubmit(function (event) {
+        event.preventDefault();
+        submitButton.name = 'Uploading...';
+
+        var file = document.getElementById('sds_file').files[0];
+        var formData = new FormData();
+        formData.append('sds_file', file, file.name);
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', url, true);
+
+        xhr.onload = function() {
+          if (xhr.status === 200) {
+            submitButton.name = 'Submit';
+          }
+          else {
+            alert('An error occured!');
+          }
+        };
+        xhr.send(formData);
+      });
+    });
+  </script>
+  </head>
+  <body>
+    <form method="POST" enctype='multipart/form-data'>
+      {{ form.hidden_tag() }}
+      {{ form.sds_file.label }}{{ form.sds_file }}
+      <br>
+      {{ form.product_name.label }} {{ form.product_name }}
+      <br>
+      {{ form.flash_point.label }} {{ form.flash_point }}
+      <br>
+      {{ form.specific_gravity.label }} {{ form.specific_gravity }}
+      <br>
+      {{ form.cas_number.label }} {{ form.cas_number }}
+      <br>
+      {{ form.nfpa.label }} {{ form.nfpa }}
+      <br>
+      {{ form.sara_311.label }} {{ form.sara_311 }}
+      <br>
+      {{ form.revision_date.label }} {{ form.revision_date }}
+      <br>
+      {{ form.physical_state.label }} {{ form.physical_state }}
+      <br>
+      {{ form.submit() }}
+    </form>
+    <div>
+      <p id="chemical_data"></p>
+    </div>
+  </body>
+</html>
