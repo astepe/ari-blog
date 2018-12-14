@@ -101,6 +101,11 @@ function selectAll() {
 </style>
 {% endblock %}
 
+{% block current %}
+  <div class="navlink"><a href="{{url_for('blog.view_blog')}}">Blog</a></div>
+  <div class="navlink"><a href="{{url_for('projects.view_projects')}}">Projects</a></div>
+{% endblock %}
+
 {% block content %}
 <form method="POST" enctype='multipart/form-data'>
   {{form.hidden_tag()}}

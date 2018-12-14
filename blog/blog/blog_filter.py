@@ -68,8 +68,8 @@ class Filter():
                         False: '</p><hr /><p>',
                     },
                     'line_break': {
-                        True: '</p><br /><p>',
-                        False: '</p><br /><p>',
+                        True: '</p><p>',
+                        False: '</p><p>',
                     },
                     'escape': {
                         True: '',
