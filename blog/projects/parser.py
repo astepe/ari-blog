@@ -9,7 +9,7 @@ class ChemicalData:
 
     CATEGORIES = (
         CATEGORY('Product Name', re.compile(r"[P|p]roduct (([N|n]ame)|([D|d]escription)).*?(?P<data>[^ :\n].*?)(P|C)", re.DOTALL)),
-        CATEGORY('Flash Point', re.compile(r"([F|f]lash [P|p]oint)([\s:\d.°C]{0,18}\s{0,8}\(\s{0,4})?(?P<data>[0-9.]*\s*)?°?\s?F", re.DOTALL)),
+        CATEGORY('Flash Point (°F)', re.compile(r"([F|f]lash [P|p]oint)([\sC\d°:\(.]*?(?P<data>[0-9°.]*)\s*?°?\s?F)?", re.DOTALL)),
         CATEGORY('Specific Gravity', re.compile(r"([R|r]elative [D|d]ensity|[S|s]pecific [G|g]ravity)\s*(?P<data>[0-9.]*\s)?", re.DOTALL)),
         CATEGORY('CAS #', re.compile(r"CAS.*?(?P<data>\d{2,7}\n*?-\n*?\d{2}\n*?-\n*?\d)", re.DOTALL)),
         CATEGORY('NFPA Fire', re.compile(r"NFPA.*?[F|f]ire.*?(?P<data>[0-4])", re.DOTALL)),
@@ -20,8 +20,13 @@ class ChemicalData:
         CATEGORY('Physical State', re.compile(r"F[\s]*?o[\s]*?r[\s]*?m[\s]*?\W(.)*?(?P<data>\w+)\s", re.DOTALL))
         )
 
+    CATEGORY_CHECKS = {category.name: True for category in CATEGORIES}
 
-def sds_parser(sds_file):
+
+def sds_parser(sds_file, category_checks=None):
+
+        if category_checks:
+            ChemicalData.CATEGORY_CHECKS.update(category_checks)
 
         sds_text = get_pdf_text(sds_file)
 
@@ -34,23 +39,28 @@ def get_chemical_data(text):
 
     chemical_data = {}
 
+    print(ChemicalData.CATEGORY_CHECKS)
     for category in ChemicalData.CATEGORIES:
 
-        match_found = category.regex.search(text)
+        print(category.name)
 
-        if match_found:
+        if ChemicalData.CATEGORY_CHECKS[category.name] is True:
 
-            if match_found.group('data'):
-                match = match_found.group('data').replace('\n', '')
+            match_found = category.regex.search(text)
+
+            if match_found:
+
+                if match_found.group('data'):
+                    match = match_found.group('data').replace('\n', '')
+                else:
+                    match = 'No data available'
+                chemical_data[category.name] = match
+                #print(category.name + ': ' + match)
+
             else:
-                match = 'Not Listed'
-            chemical_data[category.name] = match
-            print(category.name + ': ' + match)
 
-        else:
-
-            chemical_data[category.name] = 'Not Found'
-            print(category.name + ': ' + 'Not Found')
+                chemical_data[category.name] = 'Data not listed'
+                #print(category.name + ': ' + 'Not Found')
 
     return chemical_data
 

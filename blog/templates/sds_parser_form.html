@@ -1,77 +1,155 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Form for inputting an sds pdf for parsing</title>
-    <script src="http://code.jquery.com/jquery-1.8.3.min.js"></script>
-    <script>
-    $(document).ready(function() {
-      var form = document.getElementById('form');
-      var submitButton = document.getElementById('submit');
-      var url = "{{ url_for('projects.submit_sds') }}";
+{% extends 'base.html' %}
 
-      form.onsubmit(function (event) {
-        event.preventDefault();
-        submitButton.name = 'Uploading...';
+{% block head %}
+<script src="http://code.jquery.com/jquery-1.8.3.min.js"></script>
+<script>
+$(document).ready(function() {
+  var form = document.getElementById('form');
+  var submitButton = document.getElementById('submit');
+  var url = "{{ url_for('projects.submit_sds') }}";
 
-        var file = document.getElementById('sds_file').files[0];
-        var formData = new FormData();
-        formData.append('sds_file', file, file.name);
+  form.onsubmit(function (event) {
+    event.preventDefault();
+    submitButton.name = 'Uploading...';
 
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', url, true);
+    var file = document.getElementById('sds_file').files[0];
+    var formData = new FormData();
+    formData.append('sds_file', file, file.name);
 
-        xhr.onload = function() {
-          if (xhr.status === 200) {
-            submitButton.name = 'Submit';
-          }
-          else {
-            alert('An error occured!');
-          }
-        };
-        xhr.send(formData);
-      });
-    });
-    function copyFunction(category) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', url, true);
 
-      var copyText = document.getElementById(category);
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        submitButton.name = 'Submit';
+      }
+      else {
+        alert('An error occured!');
+      }
+    };
+    xhr.send(formData);
+  });
+});
+function copyFunction(category) {
 
-      copyText.select();
+  var copyText = document.getElementById(category + "_text");
+  var temp = document.createElement('textarea');
+  temp.value = copyText.innerHTML;
+  temp.setAttribute('readonly', '');
+  temp.style = {position: 'absolute', left: '-9999px'};
+  document.body.appendChild(temp);
+  temp.select();
+  document.execCommand("copy");
+  document.body.removeChild(temp);
 
-      document.execCommand("copy");
+  var copyButtons = document.getElementsByClassName("copy_button");
+  for (i = 0; i < copyButtons.length; i++) {
+    if(copyButtons[i].innerHTML === "Text Copied!"){
+      copyButtons[i].innerHTML = "Copy to clipboard";
+    };
+  };
+  var copyButton = document.getElementById(category + "_button");
+  copyButton.innerHTML = "Text Copied!"
 
-      alert("Copied the text: " + copyText.value);
-    }
-  </script>
-  </head>
-  <body>
-    <form method="POST" enctype='multipart/form-data'>
-      {{ form.hidden_tag() }}
-      {{ form.sds_file.label }}{{ form.sds_file }}
-      <br>
-      {{ form.product_name.label }} {{ form.product_name }}
-      <br>
-      {{ form.flash_point.label }} {{ form.flash_point }}
-      <br>
-      {{ form.specific_gravity.label }} {{ form.specific_gravity }}
-      <br>
-      {{ form.cas_number.label }} {{ form.cas_number }}
-      <br>
-      {{ form.nfpa.label }} {{ form.nfpa }}
-      <br>
-      {{ form.sara_311.label }} {{ form.sara_311 }}
-      <br>
-      {{ form.revision_date.label }} {{ form.revision_date }}
-      <br>
-      {{ form.physical_state.label }} {{ form.physical_state }}
-      <br>
-      {{ form.submit() }}
-    </form>
+
+}
+function selectAll() {
+  var boxes = document.getElementsByClassName("category");
+  var select_all_box = document.getElementById("select_all");
+
+  for (i = 0; i < boxes.length; i++) {
+    boxes[i].checked = select_all_box.checked;
+  };
+};
+</script>
+<style>
+.check_boxes {
+  display: grid;
+  grid-template-columns: 300px 200px;
+  align-items: center;
+}
+#requested_sds_data {
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-column-gap: 20 px;
+  align-items: left;
+}
+.category_output_list{
+  display: grid;
+  grid-template-columns: 300px 500px auto;
+  color: #4B8BBE;
+  justify-content: left;
+  align-items: center;
+  border: 5px solid rgba(0, 0, 0, 0.03);
+  border-radius: 3px;
+}
+.category_item {
+  display: grid;
+  justify-content: left;
+  align-items: center;
+}
+.copy_button {
+  display: grid;
+  justify-content: center;
+  align-items: center;
+}
+#test_links {
+  background-color: #f4f5d9;
+  display: grid;
+  grid-template-columns: 300px 500px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<form method="POST" enctype='multipart/form-data'>
+  {{form.hidden_tag()}}
+<h1 style="padding-top: 50px;">SDS Data Extractor</h1>
+<ol>
+  <li style="color: #306998; font-weight: bold;">Select an SDS file for data extraction:</li>
+    {{form.sds_file}}
+    <div id="test_links">
+      <p>Here are a few for testing:</p>
+      <ul>
+        <li><a target="_blank" href="https://www.sigmaaldrich.com/MSDS/MSDS/DisplayMSDSPage.do?country=US&language=en&productNumber=E7023&brand=SIGALD&PageToGoToURL=https%3A%2F%2Fwww.sigmaaldrich.com%2Fcatalog%2Fsearch%3Fterm%3DEthyl%2Balcohol%252C%2BPure%26interface%3DProduct%2520Name%26N%3D0%2B%26mode%3Dmode%2520matchpartialmax%26lang%3Den%26region%3DUS%26focus%3DproductN%3D0%2520220003048%2520219853286%2520219853269">Ethyl alcohol, pure - Sigma Aldrich</a></li>
+        <li><a target="_blank" href="https://www.sigmaaldrich.com/MSDS/MSDS/DisplayMSDSPage.do?country=US&language=en&productNumber=S8045&brand=SIGALD&PageToGoToURL=https%3A%2F%2Fwww.sigmaaldrich.com%2Fcatalog%2Fsearch%3Fterm%3DSodium%2Bhydroxide%26interface%3DProduct%2520Name%26N%3D0%2B%26mode%3Dmode%2520matchpartialmax%26lang%3Den%26region%3DUS%26focus%3DproductN%3D0%2520220003048%2520219853286%2520219853269">Sodium hydroxide - Sigma Aldrich</a></li>
+      </ul>
+    </div>
+    <br>
+  <li style="color: #306998; font-weight: bold;">Choose which fields you want to have extracted:</li>
     <div>
-      {% for category, data in chemical_data.items() %}
-        <p>{{category}}</p> <input id="{{category}}" type="text" value="{{data}}">
-        <button onclick="copyFunction('{{category}}')">Copy Text</button>
+      <h4>Select All Fields<input type="checkbox" id="select_all" onchange="selectAll()" checked></h4>
+    </div>
+    <div class="check_boxes">
+      {% for field in form %}
+      {% if field.id not in ['submit', 'sds_file', 'csrf_token'] %}
+      <p style="padding: 5px;">{{field.label}}:{{field(class='category')}}</p>
+      {% endif %}
       {% endfor %}
     </div>
-  </body>
-</html>
+    <br>
+  <li style="color: #306998; font-weight: bold;">Click submit:</li>
+    {{form.submit(style="height: 75px; width: 200px;")}}
+</ol>
+</form>
+<div id="requested_sds_data">
+  {% if chemical_data %}
+  <div class="category_output_list">
+    <h1 class="category_item">Field</h1>
+    <h1 class="category_item">Data</h1>
+    <div></div>
+  </div>
+  {% endif %}
+  {% for category, data in chemical_data.items() %}
+  <div class="category_output_list">
+    <div class="category_item">
+      <h3>{{category}}:</h3>
+    </div>
+    <div class="category_item">
+      <p id="{{category}}_text">{{data}}</p>
+    </div>
+    <button class="copy_button" id="{{category}}_button" onclick="copyFunction('{{category}}')">Copy to clipboard</button>
+ </div>
+  {% endfor %}
+</div>
+{% endblock %}
