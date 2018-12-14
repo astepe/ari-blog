@@ -58,7 +58,11 @@
       {{ form.submit() }}
     </form>
     <div>
-      <p id="chemical_data"></p>
+      <ul>
+      {% for category, data in chemical_data.items() %}
+        <li>{{category}}: {{data}}</li>
+      {% endfor %}
+      </ul>
     </div>
   </body>
 </html>

@@ -45,7 +45,7 @@ def submit_sds():
 
     if request.method == 'GET':
 
-        return render_template("sds_parser_form.html", form=form)
+        return render_template("sds_parser_form.html", form=form, chemical_data={})
 
     elif form.validate_on_submit():
 
@@ -53,7 +53,7 @@ def submit_sds():
         form.sds_file.data.save(temp_file)
         chemical_data = sds_parser(temp_file)
 
-        return jsonify(chemical_data)
+        return render_template('sds_parser_form.html', form=form, chemical_data=chemical_data)
 
     else:
 
