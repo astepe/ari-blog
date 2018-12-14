@@ -56,7 +56,6 @@ def submit_sds():
         temp_file = os.getcwd() + '/tempsds.pdf'
         form.sds_file.data.save(temp_file)
         chemical_data = sds_parser(temp_file, category_checks)
-        print('valid!')
 
         return render_template('sds_parser_form.html', form=form, chemical_data=chemical_data)
 
