@@ -1,37 +1,74 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<script src="http://code.jquery.com/jquery-1.8.3.min.js"></script>
 <script>
-$(document).ready(function() {
-  var form = document.getElementById('form');
-  var submitButton = document.getElementById('submit');
-  var url = "{{ url_for('projects.submit_sds') }}";
+function displayResults(results) {
 
-  form.onsubmit(function (event) {
-    event.preventDefault();
-    submitButton.name = 'Uploading...';
+  var sds_chart = document.getElementById('requested_sds_data');
 
-    var file = document.getElementById('sds_file').files[0];
-    var formData = new FormData();
-    formData.append('sds_file', file, file.name);
+  while (sds_chart.firstChild) {
+    sds_chart.removeChild(sds_chart.firstChild);
+  }
 
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', url, true);
+  for (var key in results) {
+    var categoryOutputList = document.createElement('div');
 
-    xhr.onload = function() {
-      if (xhr.status === 200) {
-        submitButton.name = 'Submit';
-      }
-      else {
-        alert('An error occured!');
-      }
-    };
-    xhr.send(formData);
-  });
-});
+    var categoryItem = document.createElement('div');
+    var h3 = document.createElement('h3');
+    var h3Text = document.createTextNode(key + ":");
+    categoryOutputList.className = "category_output_list";
+    categoryItem.className = "category_item";
+
+    h3.appendChild(h3Text);
+    categoryItem.appendChild(h3);
+    categoryOutputList.appendChild(categoryItem);
+
+    categoryItem = document.createElement('div');
+    var p = document.createElement('p');
+    var pText = document.createTextNode(results[key]);
+    p.id = key + "_text";
+    categoryItem.className = "category_item";
+
+    p.appendChild(pText);
+    categoryItem.appendChild(p);
+    categoryOutputList.appendChild(categoryItem);
+
+    var copyButton = document.createElement('button');
+    var copyButtonText = document.createTextNode('Copy to clipboard');
+    var onclick = document.createAttribute("onclick");
+    copyButton.className = "copy_button";
+    copyButton.id = key + "_button";
+    onclick.value = "copyFunction('"+ key +"');";
+    copyButton.setAttributeNode(onclick);
+
+    copyButton.append(copyButtonText);
+    categoryOutputList.appendChild(copyButton);
+
+    sds_chart.appendChild(categoryOutputList);
+
+  };
+};
+function sendRequest(event) {
+  var xhr = new XMLHttpRequest();
+  var url = "{{url_for('projects.submit_sds')}}";
+  var form = document.forms[0];
+
+  formData = new FormData(form);
+
+  xhr.open('POST', url, true);
+
+  xhr.onload = function() {
+    if(this.status == 200) {
+      displayResults(JSON.parse(this.responseText).data);
+    }
+  }
+
+  xhr.send(formData);
+}
+
 function copyFunction(category) {
 
+  console.log(copyText);
   var copyText = document.getElementById(category + "_text");
   var temp = document.createElement('textarea');
   temp.value = copyText.innerHTML;
@@ -51,8 +88,8 @@ function copyFunction(category) {
   var copyButton = document.getElementById(category + "_button");
   copyButton.innerHTML = "Text Copied!"
 
-
 }
+
 function selectAll() {
   var boxes = document.getElementsByClassName("category");
   var select_all_box = document.getElementById("select_all");
@@ -107,7 +144,7 @@ function selectAll() {
 {% endblock %}
 
 {% block content %}
-<form method="POST" enctype='multipart/form-data'>
+<form onsubmit="event.preventDefault(); sendRequest(event);" method="POST" enctype='multipart/form-data'>
   {{form.hidden_tag()}}
 <h1 style="padding-top: 50px;">SDS Data Extractor</h1>
 <ol>
@@ -138,23 +175,10 @@ function selectAll() {
 </ol>
 </form>
 <div id="requested_sds_data">
-  {% if chemical_data %}
   <div class="category_output_list">
     <h1 class="category_item">Field</h1>
     <h1 class="category_item">Data</h1>
     <div></div>
   </div>
-  {% endif %}
-  {% for category, data in chemical_data.items() %}
-  <div class="category_output_list">
-    <div class="category_item">
-      <h3>{{category}}:</h3>
-    </div>
-    <div class="category_item">
-      <p id="{{category}}_text">{{data}}</p>
-    </div>
-    <button class="copy_button" id="{{category}}_button" onclick="copyFunction('{{category}}')">Copy to clipboard</button>
- </div>
-  {% endfor %}
 </div>
 {% endblock %}

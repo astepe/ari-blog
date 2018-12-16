@@ -3,7 +3,7 @@ from blog.models import Project
 from blog.projects import projects
 from blog.projects.parser import sds_parser
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, SubmitField, FieldList, FormField
+from wtforms import BooleanField, SubmitField
 from flask_wtf.file import FileField, FileRequired
 import os
 
@@ -49,7 +49,6 @@ def submit_sds():
 
         category_checks = {}
         for field in form:
-            print(field.type)
             if field.type == 'BooleanField':
                 category_checks[field.label.text] = field.data
 
@@ -57,6 +56,6 @@ def submit_sds():
         form.sds_file.data.save(temp_file)
         chemical_data = sds_parser(temp_file, category_checks)
 
-        return render_template('sds_parser_form.html', form=form, chemical_data=chemical_data)
+        return jsonify({'data': chemical_data})
 
     return render_template("sds_parser_form.html", form=form, chemical_data={})
