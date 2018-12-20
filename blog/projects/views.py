@@ -1,7 +1,7 @@
-from flask import render_template, abort, jsonify, request
+from flask import render_template, jsonify, abort
 from blog.models import Project
 from blog.projects import projects
-from blog.projects.parser import sds_parser
+from blog.projects.parser import SDSParser
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, SubmitField
 from flask_wtf.file import FileField, FileRequired
@@ -54,7 +54,8 @@ def submit_sds():
 
         temp_file = os.getcwd() + '/tempsds.pdf'
         form.sds_file.data.save(temp_file)
-        chemical_data = sds_parser(temp_file, category_checks)
+        sds_parser = SDSParser()
+        chemical_data = sds_parser.parse_sds(temp_file, category_checks)
 
         return jsonify({'data': chemical_data})
 

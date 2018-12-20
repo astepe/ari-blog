@@ -3,7 +3,7 @@ from PyPDF2 import PdfFileReader
 from collections import namedtuple
 
 
-class ChemicalData:
+class SDSParser:
 
     CATEGORY = namedtuple('category', 'name regex')
 
@@ -20,67 +20,59 @@ class ChemicalData:
         CATEGORY('Physical State', re.compile(r"F[\s]*?o[\s]*?r[\s]*?m[\s]*?\W(.)*?(?P<data>\w+)\s", re.DOTALL))
         )
 
-    CATEGORY_CHECKS = {category.name: True for category in CATEGORIES}
+    def __init__(self):
+        self.category_checks = {category.name: True for category in self.CATEGORIES}
 
+    def parse_sds(self, sds_file, category_checks=None):
 
-def sds_parser(sds_file, category_checks=None):
+            if category_checks:
+                self.category_checks.update(category_checks)
 
-        if category_checks:
-            ChemicalData.CATEGORY_CHECKS.update(category_checks)
+            sds_text = self.get_pdf_text(sds_file)
 
-        sds_text = get_pdf_text(sds_file)
+            chemical_data = self.get_chemical_data(sds_text)
 
-        chemical_data = get_chemical_data(sds_text)
+            return chemical_data
+
+    def get_chemical_data(self, text):
+
+        chemical_data = {}
+
+        for category in self.CATEGORIES:
+
+            if self.category_checks[category.name] is True:
+
+                match_found = category.regex.search(text)
+
+                if match_found:
+
+                    if match_found.group('data'):
+                        match = match_found.group('data').replace('\n', '')
+                    else:
+                        match = 'No data available'
+                    chemical_data[category.name] = match
+                    #print(category.name + ': ' + match)
+
+                else:
+
+                    chemical_data[category.name] = 'Data not listed'
+                    #print(category.name + ': ' + 'Not Found')
 
         return chemical_data
 
+    @staticmethod
+    def get_pdf_text(file_path):
 
-def get_chemical_data(text):
+        text = ''
 
-    chemical_data = {}
+        with open(file_path, "rb") as _:
+            pdf = PdfFileReader(_, 'rb')
 
-    print(ChemicalData.CATEGORY_CHECKS)
-    for category in ChemicalData.CATEGORIES:
+            for page_num in range(pdf.getNumPages()):
+                # TODO: unknown error from certain files
+                try:
+                    text += pdf.getPage(page_num).extractText()
+                except:
+                    pass
 
-        print(category.name)
-
-        if ChemicalData.CATEGORY_CHECKS[category.name] is True:
-
-            match_found = category.regex.search(text)
-
-            if match_found:
-
-                if match_found.group('data'):
-                    match = match_found.group('data').replace('\n', '')
-                else:
-                    match = 'No data available'
-                chemical_data[category.name] = match
-                #print(category.name + ': ' + match)
-
-            else:
-
-                chemical_data[category.name] = 'Data not listed'
-                #print(category.name + ': ' + 'Not Found')
-
-    return chemical_data
-
-
-def get_pdf_text(file_path):
-
-    text = ''
-
-    with open(file_path, "rb") as _:
-        pdf = PdfFileReader(_, 'rb')
-
-        for page_num in range(pdf.getNumPages()):
-            # TODO: unknown error from certain files
-            try:
-                text += pdf.getPage(page_num).extractText()
-            except:
-                pass
-
-    return text
-
-
-if __name__ == '__main__':
-    sds_to_csv()
+        return text
