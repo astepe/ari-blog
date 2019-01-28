@@ -182,20 +182,28 @@ textarea, code, pre {
   grid-template-rows: 1fr;
   grid-column-gap: 20 px;
   align-items: left;
+  padding-right: 300px;
 }
 .category_output_list{
   display: grid;
-  grid-template-columns: 300px 500px auto;
-  color: #4B8BBE;
+  grid-template-columns: 300px 325px 200px;
   justify-content: left;
   align-items: center;
-  border: 5px solid rgba(0, 0, 0, 0.03);
+  border-top: 5px dotted;
   border-radius: 3px;
+  border-color: #4B8BBE;
 }
 .category_item {
   display: grid;
   justify-content: left;
   align-items: center;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+.check_box {
+  opacity: 0;
+  position: absolute;
+  left: -9999px
 }
 .copy_button {
   display: grid;
@@ -203,7 +211,16 @@ textarea, code, pre {
   align-items: center;
 }
 #test_links {
-  background-color: #f4f5d9;
   display: grid;
-  grid-template-columns: 300px 500px;
+  grid-template-columns: 300px;
+}
+.check_box_label:hover {
+  background-color: #A2BFD5;
+}
+.check_box_label_clicked {
+  background-color: #4B8BBE;
+}
+.check_box_label {
+  border: dotted;
+  padding: 10px;
 }

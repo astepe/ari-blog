@@ -29,6 +29,8 @@ function displayResults(results) {
     categoryItem.appendChild(p);
     categoryOutputList.appendChild(categoryItem);
 
+    var copyButtonDiv = document.createElement('div')
+    copyButtonDiv.className = "category_item";
     var copyButton = document.createElement('button');
     var copyButtonText = document.createTextNode('Copy to clipboard');
     var onclick = document.createAttribute("onclick");
@@ -38,7 +40,8 @@ function displayResults(results) {
     copyButton.setAttributeNode(onclick);
 
     copyButton.append(copyButtonText);
-    categoryOutputList.appendChild(copyButton);
+    copyButtonDiv.appendChild(copyButton)
+    categoryOutputList.appendChild(copyButtonDiv);
 
     sds_chart.appendChild(categoryOutputList);
 
@@ -70,10 +73,28 @@ function copyFunction(category) {
 }
 
 function selectAll() {
-  var boxes = document.getElementsByClassName("category");
+  var check_box_labels = document.getElementsByClassName("check_box_label");
+  var check_boxes = document.getElementsByClassName("check_box");
   var select_all_box = document.getElementById("select_all");
 
-  for (i = 0; i < boxes.length; i++) {
-    boxes[i].checked = select_all_box.checked;
+  // check boxes
+  for (i = 0; i < check_boxes.length; i++) {
+    check_boxes[i].checked = select_all_box.checked;
   };
+  console.log(check_boxes);
+  // update css
+  if (select_all_box.checked) {
+    Array.from(check_box_labels).forEach((element)=>{
+      if (!(element.classList.contains("check_box_label_clicked"))){
+        element.classList.add("check_box_label_clicked")
+      }
+    });
+  }
+  else {
+    Array.from(check_box_labels).forEach((element)=>{
+      if (element.classList.contains("check_box_label_clicked")){
+        element.classList.remove("check_box_label_clicked")
+      }
+    });
+  }
 };

@@ -14,6 +14,11 @@ function sendRequest(event) {
   xhr.onload = function() {
     if(this.status == 200) {
       displayResults(JSON.parse(this.responseText).data);
+      let submit = document.getElementById("submit")
+      window.scrollTo({
+          top: submit.offsetTop + submit.offsetHeight,
+          behavior: 'smooth'
+        });
     }
   }
 
@@ -35,21 +40,17 @@ function sendRequest(event) {
   <li style="color: #306998; font-weight: bold;">Select an SDS file for data extraction:</li>
     {{form.sds_file}}
     <div id="test_links">
-      <p>Here are a few for testing:</p>
-      <ul>
-        <li><a target="_blank" href="https://www.sigmaaldrich.com/MSDS/MSDS/DisplayMSDSPage.do?country=US&language=en&productNumber=L4509&brand=SIAL&PageToGoToURL=https%3A%2F%2Fwww.sigmaaldrich.com%2Fcatalog%2Fsearch%3Fterm%3DL4509%26interface%3DAll%26N%3D0%26mode%3Dmatch%2520partialmax%26lang%3Den%26region%3DUS%26focus%3Dproduct">Sodium dodecyl sulfate - Sigma Aldrich</a></li>
-        <li><a target="_blank" href="https://www.sigmaaldrich.com/MSDS/MSDS/DisplayMSDSPage.do?country=US&language=en&productNumber=E7023&brand=SIGALD&PageToGoToURL=https%3A%2F%2Fwww.sigmaaldrich.com%2Fcatalog%2Fsearch%3Fterm%3DEthyl%2Balcohol%252C%2BPure%26interface%3DProduct%2520Name%26N%3D0%2B%26mode%3Dmode%2520matchpartialmax%26lang%3Den%26region%3DUS%26focus%3DproductN%3D0%2520220003048%2520219853286%2520219853269">Ethyl alcohol, pure - Sigma Aldrich</a></li>
-      </ul>
+      <a style="text-decoration: underline;" target="_blank" href="https://www.sigmaaldrich.com/MSDS/MSDS/DisplayMSDSPage.do?country=US&amp;language=en&amp;productNumber=L4509&amp;brand=SIAL&amp;PageToGoToURL=https%3A%2F%2Fwww.sigmaaldrich.com%2Fcatalog%2Fsearch%3Fterm%3DL4509%26interface%3DAll%26N%3D0%26mode%3Dmatch%2520partialmax%26lang%3Den%26region%3DUS%26focus%3Dproduct">Download an SDS here</a>
     </div>
     <br>
   <li style="color: #306998; font-weight: bold;">Choose which fields you want to have extracted:</li>
     <div>
-      <h4>Select All Fields<input type="checkbox" id="select_all" onchange="selectAll()"></h4>
+      <h4><label class="check_box_label" for="select_all">Select All Fields</label><input class="check_box" type="checkbox" id="select_all" onchange="selectAll()"></h4>
     </div>
     <div class="check_boxes">
       {% for field in form %}
       {% if field.id not in ['submit', 'sds_file', 'csrf_token'] %}
-      <p style="padding: 5px;">{{field.label}}:{{field(class='category')}}</p>
+        <p>{{field.label(class='check_box_label')}}{{field(class='check_box')}}</p>
       {% endif %}
       {% endfor %}
     </div>
@@ -65,4 +66,5 @@ function sendRequest(event) {
     <div></div>
   </div>
 </div>
+<script src="{{url_for('static', filename='highlightSelectedCheckBox.js')}}"></script>
 {% endblock %}

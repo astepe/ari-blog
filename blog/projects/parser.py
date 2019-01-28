@@ -25,14 +25,14 @@ class SDSParser:
 
     def parse_sds(self, sds_file, category_checks=None):
 
-            if category_checks:
-                self.category_checks.update(category_checks)
+        if category_checks:
+            self.category_checks.update(category_checks)
 
-            sds_text = self.get_pdf_text(sds_file)
+        sds_text = self.get_pdf_text(sds_file)
 
-            chemical_data = self.get_chemical_data(sds_text)
+        chemical_data = self.get_chemical_data(sds_text)
 
-            return chemical_data
+        return chemical_data
 
     def get_chemical_data(self, text):
 
@@ -51,12 +51,12 @@ class SDSParser:
                     else:
                         match = 'No data available'
                     chemical_data[category.name] = match
-                    #print(category.name + ': ' + match)
+                    # print(category.name + ': ' + match)
 
                 else:
 
                     chemical_data[category.name] = 'Data not listed'
-                    #print(category.name + ': ' + 'Not Found')
+                    # print(category.name + ': ' + 'Not Found')
 
         return chemical_data
 
