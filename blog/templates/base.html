@@ -4,12 +4,18 @@
   <link rel="icon" href="https://s3.us-east-2.amazonaws.com/ari-blog-assets/me_Mp7_icon.ico" type="image/x-icon">
   <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='mystyle.css')}}">
   <script src="{{url_for('static', filename='myscripts.js')}}"></script>
-  <meta charset="utf-8">
+  <script>
+
+  </script>
+  </script>
   {% block head %}
   {% endblock %}
 </head>
 
   <body>
+    <script>
+      document.body.className = 'fade';
+    </script>
 
     <div class="header-line"></div>
     <div class="container">
@@ -29,6 +35,12 @@
     {% block content %}
 
     {% endblock %}
-  </div>
+    </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", function(e) {
+        document.body.className = '';
+      });
+      window.onbeforeunload = fadeOutEffect(e);
+    </script>
   </body>
 </html>
