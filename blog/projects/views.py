@@ -47,16 +47,16 @@ def submit_sds():
 
     if form.validate_on_submit():
 
-        category_checks = {}
+        request_keys = []
         for field in form:
-            if field.type == 'BooleanField':
-                category_checks[field.label.text] = field.data
+            if field.data:
+                request_keys.append(field.name)
 
         temp_file = os.getcwd() + '/tempsds.pdf'
         form.sds_file.data.save(temp_file)
-        sds_parser = SDSParser()
-        chemical_data = sds_parser.parse_sds(temp_file, category_checks)
+        sds_parser = SDSParser(request_keys=request_keys)
+        sds_data = sds_parser.get_sds_data(temp_file, request_keys)
 
-        return jsonify({'data': chemical_data})
+        return jsonify({'data': sds_data})
 
     return render_template("sds_parser_form.html", form=form, chemical_data={})
