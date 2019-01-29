@@ -22,12 +22,26 @@ function displayResults(results) {
     sds_chart.removeChild(sds_chart.firstChild);
   }
 
+  sds_data_titles = {
+        'manufacturer': 'Manufacturer',
+        'product_name': 'Product Name',
+        'flash_point': 'Flash Point',
+        'specific_gravity': 'Specific Gravity',
+        'nfpa_fire': 'NFPA Fire',
+        'nfpa_health': 'NFPA Health',
+        'nfpa_reactivity': 'NFPA Reactivity',
+        'sara_311': 'SARA 311/312',
+        'revision_date': 'Revision Date',
+        'physical_state': 'Physical State',
+        'cas_number': 'CAS # (if pure)'
+    }
+
   for (var key in results) {
     var categoryOutputList = document.createElement('div');
 
     var categoryItem = document.createElement('div');
     var h3 = document.createElement('h3');
-    var h3Text = document.createTextNode(key + ":");
+    var h3Text = document.createTextNode(sds_data_titles[key] + ":");
     categoryOutputList.className = "category_output_list";
     categoryItem.className = "category_item";
 
