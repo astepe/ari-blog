@@ -1,5 +1,5 @@
 from blog import create_app, db
-from blog.models import BlogPost, Project
+from blueprints.models import BlogPost, Project
 
 app = create_app()
 

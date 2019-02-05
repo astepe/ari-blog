@@ -3,11 +3,11 @@ import sys
 import boto3
 import mimetypes
 from flask import jsonify, request, current_app
-from blog.api import api
+from blueprints.api import api
 from blog import db
-from blog.models import BlogPost
-from blog.api.errors import bad_request, not_found
-from blog.api.auth import token_auth
+from blueprints.models import BlogPost
+from blueprints.api.errors import bad_request, not_found
+from blueprints.api.auth import token_auth
 from PIL import Image
 
 

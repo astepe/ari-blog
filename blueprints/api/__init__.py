@@ -2,4 +2,4 @@ from flask import Blueprint
 
 api = Blueprint('api', __name__)
 
-from blog.api import blogposts, tokens
+from blueprints.api import blogposts, tokens

@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template
-from blog.error_pages import error_pages
+from blueprints.error_pages import error_pages
 
 
 @error_pages.app_errorhandler(404)

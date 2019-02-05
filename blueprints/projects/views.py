@@ -1,11 +1,12 @@
 from flask import render_template, jsonify, abort
-from blog.models import Project
-from blog.projects import projects
-from blog.projects.parser import SDSParser
+from blueprints.models import Project
+from blueprints.projects import projects
+from blueprints.projects.parser import SDSParser
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, SubmitField
 from flask_wtf.file import FileField, FileRequired
 import os
+from celery_worker import celery
 
 
 class SDSForm(FlaskForm):
@@ -24,9 +25,17 @@ class SDSForm(FlaskForm):
     submit = SubmitField('Submit')
 
 
+@celery.task
+def add_these(x, y):
+    return x + y
+
+
 # view list of all projects
 @projects.route('/projects', methods=['GET'])
 def view_projects():
+    result = add_these.delay(1, 2)
+    print(result)
+    print(result.wait())
     return render_template("projects.html")
 
 
@@ -54,9 +63,16 @@ def submit_sds():
 
         temp_file = os.getcwd() + '/tempsds.pdf'
         form.sds_file.data.save(temp_file)
-        sds_parser = SDSParser(request_keys=request_keys)
-        sds_data = sds_parser.get_sds_data(temp_file, request_keys)
+
+        # celery task
+        sds_data = get_sds_data(temp_file, request_keys)
 
         return jsonify({'data': sds_data})
 
     return render_template("sds_parser_form.html", form=form, chemical_data={})
+
+
+# @celery.task()
+# def get_sds_data(temp_file, request_keys):
+#     sds_parser = SDSParser(request_keys=request_keys)
+#     return sds_parser.get_sds_data(temp_file, request_keys)

@@ -1,6 +1,6 @@
 from flask_httpauth import HTTPBasicAuth, HTTPTokenAuth
-from blog.api.errors import error_response
-from blog.models import Token
+from blueprints.api.errors import error_response
+from blueprints.models import Token
 from flask_bcrypt import Bcrypt
 
 basic_auth = HTTPBasicAuth()

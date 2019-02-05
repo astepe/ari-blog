@@ -1,6 +1,13 @@
 {% extends 'base.html' %}
 
 {% block head %}
+<style>
+#dropbox {
+border: 5px solid blue;
+width:  200px;
+height: 100px;
+}
+</style>
 <script>
 function sendRequest(event) {
   var xhr = new XMLHttpRequest();
@@ -28,13 +35,16 @@ function sendRequest(event) {
 {% endblock %}
 
 {% block current %}
-  <div class="navlink"><a href="{{url_for('blog.view_blog')}}">Blog</a></div>
+  <div class="navlink"><a href="{{url_for('blueprints.view_blog')}}">Blog</a></div>
   <div class="navlink"><a href="{{url_for('projects.view_projects')}}">Projects</a></div>
 {% endblock %}
 
 {% block content %}
 <form onsubmit="event.preventDefault(); sendRequest(event);" method="POST" enctype='multipart/form-data'>
   {{form.hidden_tag()}}
+<div id="dropbox">
+  <p>Drag one or more files to this Drop Zone ...</p>
+</div>
 <h1 style="padding-top: 50px;">SDS Data Extractor</h1>
 <ol>
   <li style="color: #306998; font-weight: bold;">Select an SDS file for data extraction:</li>
@@ -67,4 +77,33 @@ function sendRequest(event) {
   </div>
 </div>
 <script src="{{url_for('static', filename='highlightSelectedCheckBox.js')}}"></script>
+<script>
+  function handleFiles(files) {
+
+  }
+  function dragenter(e) {
+    e.stopPropagation();
+    e.preventDefault();
+  }
+
+  function dragover(e) {
+    e.stopPropagation();
+    e.preventDefault();
+  }
+  function drop(e) {
+    e.stopPropagation();
+    e.preventDefault();
+
+    const dt = e.dataTransfer;
+    const files = dt.files;
+
+    handleFiles(files);
+  }
+  let dropbox;
+
+  dropbox = document.getElementById("dropbox");
+  dropbox.addEventListener("dragenter", dragenter, false);
+  dropbox.addEventListener("dragover", dragover, false);
+  dropbox.addEventListener("drop", drop, false);
+</script>
 {% endblock %}

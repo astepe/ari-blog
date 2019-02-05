@@ -25,7 +25,7 @@ class SDSParser:
         if request_keys is not None:
             self.request_keys = request_keys
         else:
-            self.request_keys = SDSRegexes.REQUEST_KEYS
+            self.request_keys = Configs.REQUEST_KEYS
 
         self.ocr_override = True
         self.ocr_ran = False
@@ -318,7 +318,7 @@ if __name__ == '__main__':
 
     with open('chemical_data.csv', 'w') as _:
         writer = csv.writer(_)
-        writer.writerow([SDSRegexes.SDS_DATA_TITLES[key] for key in sds_parser.request_keys])
+        writer.writerow([key for key in sds_parser.request_keys])
 
         for file in os.listdir(Configs.SDS_PDF_FILES):
             if sds_requests:

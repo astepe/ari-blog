@@ -1,9 +1,9 @@
 from flask import jsonify
-from blog.api import api
+from blueprints.api import api
 from blog import db
 from datetime import datetime
-from blog.api.auth import basic_auth
-from blog.models import Token
+from blueprints.api.auth import basic_auth
+from blueprints.models import Token
 
 
 @api.route('/tokens', methods=['POST'])
