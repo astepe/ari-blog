@@ -1,4 +1,4 @@
-from blog import db
+from blueprints import db
 from datetime import datetime, timedelta
 import base64
 import os

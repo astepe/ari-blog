@@ -1,6 +1,6 @@
 from flask import jsonify
 from blueprints.api import api
-from blog import db
+from blueprints import db
 from datetime import datetime
 from blueprints.api.auth import basic_auth
 from blueprints.models import Token
