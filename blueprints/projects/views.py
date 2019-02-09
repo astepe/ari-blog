@@ -44,7 +44,7 @@ def celery_result():
 
     worker_id = request.args.get('worker_id')
 
-    result = AsyncResult(worker_id, app=get_sds_data)
+    result = AsyncResult(worker_id)
     print(result)
     print(os.environ.get('REDIS_URL') or 'redis not found')
     if result.state == 'SUCCESS':
@@ -93,6 +93,8 @@ def submit_sds():
 
         # celery task
         worker = get_sds_data.delay(temp_file, request_keys)
+
+        print(worker)
 
         return jsonify({'worker_id': worker.id})
 
