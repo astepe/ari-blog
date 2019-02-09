@@ -61,9 +61,6 @@ def ping():
 # view list of all projects
 @projects.route('/projects', methods=['GET'])
 def view_projects():
-    result = add_these.delay(1, 2)
-    print(result.id)
-    print(result.wait())
     return render_template("projects.html")
 
 
