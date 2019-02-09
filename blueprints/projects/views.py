@@ -44,7 +44,8 @@ def celery_result():
 
     worker_id = request.args.get('worker_id')
 
-    result = AsyncResult(worker_id, app=add_these)
+    result = AsyncResult(worker_id, app=get_sds_data)
+    print(result)
     if result.state == 'SUCCESS':
         print(result.get())
         return jsonify({'data': result.get()})
