@@ -15,5 +15,3 @@ let check_boxes = document.getElementsByClassName("check_box_label");
 Array.from(check_boxes).forEach((element)=>{
   element.addEventListener("click", ()=>highlightSelectedCheckBoxLabel(element))
 })
-
-console.log(check_boxes)

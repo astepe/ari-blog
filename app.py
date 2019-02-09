@@ -1,4 +1,7 @@
-from blog import create_app, db
+import sys
+import os
+print(sys.path.append(os.getcwd()))
+from blueprints import create_app, db
 from blueprints.models import BlogPost, Project
 
 app = create_app()

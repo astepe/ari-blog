@@ -16,7 +16,7 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
 
-    from blog import models
+    from blueprints import models
 
     from blueprints.home import home
     from blueprints.projects import projects

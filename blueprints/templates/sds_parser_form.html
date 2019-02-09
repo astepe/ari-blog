@@ -1,15 +1,11 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<style>
-#dropbox {
-border: 5px solid blue;
-width:  200px;
-height: 100px;
-}
-</style>
+<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='sdsproject.css')}}">
 <script>
-function sendRequest(event) {
+var SDSDataResult;
+
+function requestSDSData(event) {
   var xhr = new XMLHttpRequest();
   var url = "{{url_for('projects.submit_sds')}}";
   var form = document.forms[0];
@@ -20,42 +16,82 @@ function sendRequest(event) {
 
   xhr.onload = function() {
     if(this.status == 200) {
-      displayResults(JSON.parse(this.responseText).data);
+      let workerId = JSON.parse(this.responseText).worker_id;
+      longPollSDSDataResult(workerId);
+      displayResults(SDSDataResult.data);
+
       let submit = document.getElementById("submit")
       window.scrollTo({
           top: submit.offsetTop + submit.offsetHeight,
           behavior: 'smooth'
         });
+      var loader = document.getElementById('loader');
+      loader.style.opacity = 0;
     }
   }
 
   xhr.send(formData);
 }
+function sleep(milliseconds) {
+  let start = new Date().getTime();
+  for (let i = 0; i < 1e7; i++) {
+    if ((new Date().getTime() - start) > milliseconds){
+      break;
+    }
+  }
+}
+
+
+function longPollSDSDataResult(workerId) {
+  while (SDSDataResult === undefined) {
+    requestSDSDataResult(workerId)
+    console.log(SDSDataResult);
+    sleep(1000)
+  }
+}
+
+function requestSDSDataResult(workerId) {
+
+  let resultUrl = "{{url_for('projects.celery_result')}}"+ '?worker_id=' + workerId
+  let xhr = new XMLHttpRequest();
+
+  xhr.open('GET', resultUrl, false);
+  xhr.setRequestHeader("Content-Type", "application/json");
+
+  xhr.onload = function() {
+    console.log('hi');
+    if(this.status === 200) {
+      console.log(this.responseText);
+      SDSDataResult = JSON.parse(this.responseText);
+    }
+  }
+  xhr.send();
+}
+
 </script>
 {% endblock %}
 
 {% block current %}
-  <div class="navlink"><a href="{{url_for('blueprints.view_blog')}}">Blog</a></div>
+  <div class="navlink"><a href="{{url_for('blog.view_blog')}}">Blog</a></div>
   <div class="navlink"><a href="{{url_for('projects.view_projects')}}">Projects</a></div>
 {% endblock %}
 
 {% block content %}
-<form onsubmit="event.preventDefault(); sendRequest(event);" method="POST" enctype='multipart/form-data'>
+<form onsubmit="event.preventDefault(); requestSDSData(event, );" method="POST" enctype='multipart/form-data'>
   {{form.hidden_tag()}}
-<div id="dropbox">
-  <p>Drag one or more files to this Drop Zone ...</p>
-</div>
 <h1 style="padding-top: 50px;">SDS Data Extractor</h1>
 <ol>
   <li style="color: #306998; font-weight: bold;">Select an SDS file for data extraction:</li>
     {{form.sds_file}}
     <div id="test_links">
-      <a style="text-decoration: underline;" target="_blank" href="https://www.sigmaaldrich.com/MSDS/MSDS/DisplayMSDSPage.do?country=US&amp;language=en&amp;productNumber=L4509&amp;brand=SIAL&amp;PageToGoToURL=https%3A%2F%2Fwww.sigmaaldrich.com%2Fcatalog%2Fsearch%3Fterm%3DL4509%26interface%3DAll%26N%3D0%26mode%3Dmatch%2520partialmax%26lang%3Den%26region%3DUS%26focus%3Dproduct">Download an SDS here</a>
+      <a style="text-decoration: underline;" target="_blank" href="https://www.sigmaaldrich.com/MSDS/MSDS/DisplayMSDSPage.do?country=US&amp;language=en&amp;productNumber=L4509&amp;brand=SIAL&amp;PageToGoToURL=https%3A%2F%2Fwww.sigmaaldrich.com%2Fcatalog%2Fsearch%3Fterm%3DL4509%26interface%3DAll%26N%3D0%26mode%3Dmatch%2520partialmax%26lang%3Den%26region%3DUS%26focus%3Dproduct">
+        Download an SDS here
+      </a>
     </div>
     <br>
-  <li style="color: #306998; font-weight: bold;">Choose which fields you want to have extracted:</li>
+  <li style="color: #306998; font-weight: bold;">Select the data you want:</li>
     <div>
-      <h4><label class="check_box_label" for="select_all">Select All Fields</label><input class="check_box" type="checkbox" id="select_all" onchange="selectAll()"></h4>
+      <h4><label class="check_box_label" for="select_all">Select All</label><input class="check_box" type="checkbox" id="select_all" onchange="selectAll()"></h4>
     </div>
     <div class="check_boxes">
       {% for field in form %}
@@ -66,44 +102,26 @@ function sendRequest(event) {
     </div>
     <br>
   <li style="color: #306998; font-weight: bold;">Click submit:</li>
+  <div id="submit_and_loader">
     {{form.submit(style="height: 75px; width: 200px;")}}
+    <div id="loader"></div>
+  </div>
 </ol>
 </form>
 <div id="requested_sds_data">
   <div class="category_output_list">
-    <h1 class="category_item">Field</h1>
+    <h1 class="category_item">Type</h1>
     <h1 class="category_item">Data</h1>
     <div></div>
   </div>
 </div>
 <script src="{{url_for('static', filename='highlightSelectedCheckBox.js')}}"></script>
 <script>
-  function handleFiles(files) {
-
-  }
-  function dragenter(e) {
-    e.stopPropagation();
-    e.preventDefault();
-  }
-
-  function dragover(e) {
-    e.stopPropagation();
-    e.preventDefault();
-  }
-  function drop(e) {
-    e.stopPropagation();
-    e.preventDefault();
-
-    const dt = e.dataTransfer;
-    const files = dt.files;
-
-    handleFiles(files);
-  }
-  let dropbox;
-
-  dropbox = document.getElementById("dropbox");
-  dropbox.addEventListener("dragenter", dragenter, false);
-  dropbox.addEventListener("dragover", dragover, false);
-  dropbox.addEventListener("drop", drop, false);
+function showLoadRing() {
+  var loader = document.getElementById('loader');
+  loader.style.opacity = 1;
+}
+var submitButton = document.getElementById('submit');
+submitButton.addEventListener('click', showLoadRing);
 </script>
 {% endblock %}

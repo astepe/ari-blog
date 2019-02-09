@@ -1,5 +1,5 @@
 
-function fadeOutEffect(e) {
+function fadeOutEffect() {
   var fadeTarget = document.getElementsByClassName("fade");
   var fadeEffect = setInterval(function () {
     if (!fadeTarget.style.opacity) {
@@ -80,7 +80,6 @@ function displayResults(results) {
 
 function copyFunction(category) {
 
-  console.log(copyText);
   var copyText = document.getElementById(category + "_text");
   var temp = document.createElement('textarea');
   temp.value = copyText.innerHTML;
@@ -111,7 +110,6 @@ function selectAll() {
   for (i = 0; i < check_boxes.length; i++) {
     check_boxes[i].checked = select_all_box.checked;
   };
-  console.log(check_boxes);
   // update css
   if (select_all_box.checked) {
     Array.from(check_box_labels).forEach((element)=>{

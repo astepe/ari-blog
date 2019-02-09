@@ -1,4 +1,4 @@
-from flask import render_template, jsonify, abort
+from flask import render_template, jsonify, abort, request
 from blueprints.models import Project
 from blueprints.projects import projects
 from blueprints.projects.parser import SDSParser
@@ -7,6 +7,8 @@ from wtforms import BooleanField, SubmitField
 from flask_wtf.file import FileField, FileRequired
 import os
 from celery_worker import celery
+from celery.result import AsyncResult
+import time
 
 
 class SDSForm(FlaskForm):
@@ -27,14 +29,40 @@ class SDSForm(FlaskForm):
 
 @celery.task
 def add_these(x, y):
+    time.sleep(4)
     return x + y
+
+
+@projects.route('/ping_request', methods=['GET'])
+def ping_request():
+    worker = add_these.delay(1, 2)
+    return jsonify({'worker_id': worker.id})
+
+
+@projects.route('/celery_result', methods=['GET'])
+def celery_result():
+
+    worker_id = request.args.get('worker_id')
+
+    result = AsyncResult(worker_id, app=add_these)
+    if result.state == 'SUCCESS':
+        print(result.get())
+        return jsonify({'data': result.get()})
+    else:
+        print('not ready')
+        return "not ready", 204
+
+
+@projects.route('/ping', methods=['GET'])
+def ping():
+    return render_template('ping.html')
 
 
 # view list of all projects
 @projects.route('/projects', methods=['GET'])
 def view_projects():
     result = add_these.delay(1, 2)
-    print(result)
+    print(result.id)
     print(result.wait())
     return render_template("projects.html")
 
@@ -65,14 +93,14 @@ def submit_sds():
         form.sds_file.data.save(temp_file)
 
         # celery task
-        sds_data = get_sds_data(temp_file, request_keys)
+        worker = get_sds_data.delay(temp_file, request_keys)
 
-        return jsonify({'data': sds_data})
+        return jsonify({'worker_id': worker.id})
 
     return render_template("sds_parser_form.html", form=form, chemical_data={})
 
 
-# @celery.task()
-# def get_sds_data(temp_file, request_keys):
-#     sds_parser = SDSParser(request_keys=request_keys)
-#     return sds_parser.get_sds_data(temp_file, request_keys)
+@celery.task()
+def get_sds_data(temp_file, request_keys):
+    sds_parser = SDSParser(request_keys=request_keys)
+    return sds_parser.get_sds_data(temp_file, request_keys)

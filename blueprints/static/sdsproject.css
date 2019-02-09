@@ -1,0 +1,75 @@
+#dropbox {
+  border: 5px solid blue;
+  width:  200px;
+  height: 100px;
+}
+#loader {
+  border: 8px solid #f3f3f3;
+  border-top: 8px solid #4b8bbe;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 2s linear infinite;
+  opacity: 0;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+#submit_and_loader {
+  display: grid;
+  grid-template-columns: 250px 100px;
+  align-items: center;
+}
+.check_boxes {
+  display: grid;
+  grid-template-columns: 200px 200px 200px 200px;
+  align-items: center;
+}
+#requested_sds_data {
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-column-gap: 20 px;
+  align-items: left;
+  padding-right: 300px;
+}
+.category_output_list{
+  display: grid;
+  grid-template-columns: 300px 325px 200px;
+  justify-content: left;
+  align-items: center;
+  border-top: 5px dotted;
+  border-radius: 3px;
+  border-color: #4B8BBE;
+}
+.category_item {
+  display: grid;
+  justify-content: left;
+  align-items: center;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+.check_box {
+  opacity: 0;
+  position: absolute;
+  left: -9999px
+}
+.copy_button {
+  display: grid;
+  justify-content: center;
+  align-items: center;
+}
+#test_links {
+  display: grid;
+  grid-template-columns: 300px;
+}
+.check_box_label:hover {
+  background-color: #A2BFD5;
+}
+.check_box_label_clicked {
+  background-color: #4B8BBE;
+}
+.check_box_label {
+  border: dotted;
+  padding: 10px;
+}

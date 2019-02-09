@@ -261,7 +261,7 @@ class SDSParser:
 
         with tempfile.TemporaryDirectory() as path:
 
-            page_images = convert_from_path(sds_file_path, fmt='jpeg', output_folder=path, dpi=500)
+            page_images = convert_from_path(sds_file_path, fmt='jpeg', output_folder=path, dpi=300)
             dir_list = os.listdir(path)
 
             # sort path list
