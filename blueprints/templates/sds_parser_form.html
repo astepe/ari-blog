@@ -45,7 +45,6 @@ function sleep(milliseconds) {
 function longPollSDSDataResult(workerId) {
   while (SDSDataResult === undefined) {
     requestSDSDataResult(workerId)
-    console.log(SDSDataResult);
     sleep(1000)
   }
 }
@@ -59,9 +58,7 @@ function requestSDSDataResult(workerId) {
   xhr.setRequestHeader("Content-Type", "application/json");
 
   xhr.onload = function() {
-    console.log('hi');
     if(this.status === 200) {
-      console.log(this.responseText);
       SDSDataResult = JSON.parse(this.responseText);
     }
   }
