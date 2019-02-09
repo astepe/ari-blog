@@ -46,6 +46,7 @@ def celery_result():
 
     result = AsyncResult(worker_id, app=get_sds_data)
     print(result)
+    print(os.environ.get('REDIS_URL') or 'redis not found')
     if result.state == 'SUCCESS':
         print(result.get())
         return jsonify({'data': result.get()})
