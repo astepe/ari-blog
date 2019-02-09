@@ -45,7 +45,7 @@ def celery_result():
     worker_id = request.args.get('worker_id')
 
     result = AsyncResult(worker_id)
-    print(result)
+    print(result.state)
     print(os.environ.get('REDIS_URL') or 'redis not found')
     if result.state == 'SUCCESS':
         print(result.get())
