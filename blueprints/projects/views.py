@@ -92,7 +92,8 @@ def submit_sds():
         form.sds_file.data.save(temp_file)
 
         # celery task
-        worker = get_sds_data.delay(temp_file, request_keys)
+        # worker = get_sds_data.delay(temp_file, request_keys)
+        worker = add_these.delay(1, 2)
 
         print(worker)
 
