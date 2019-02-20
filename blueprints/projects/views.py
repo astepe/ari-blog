@@ -30,8 +30,10 @@ class SDSForm(FlaskForm):
 def celery_result():
 
     worker_id = request.args.get('worker_id')
+    print(worker_id)
 
     result = AsyncResult(worker_id)
+    print(result)
 
     if result.state == 'SUCCESS':
         return jsonify({'data': result.get()})
