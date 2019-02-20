@@ -30,10 +30,12 @@ class SDSForm(FlaskForm):
 def celery_result():
 
     worker_id = request.args.get('worker_id')
-    print(worker_id)
+    print('worker_id: ', worker_id)
+    print(celery.conf.get('result_backend'))
 
     result = AsyncResult(worker_id)
-    print(result)
+    print('AsyncResult: ', result)
+    print(result.state)
 
     if result.state == 'SUCCESS':
         return jsonify({'data': result.get()})
@@ -79,7 +81,6 @@ def submit_sds():
     return render_template("sds_parser_form.html", form=form, chemical_data={})
 
 
-# currently not functioning
 @celery.task()
 def get_sds_data(temp_file, request_keys):
     sds_parser = SDSParser(request_keys=request_keys)

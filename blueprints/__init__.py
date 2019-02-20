@@ -17,8 +17,6 @@ def create_app(config_class=Config):
 
     celery.conf.update(app.config)
 
-    print(celery.conf)
-
     db.init_app(app)
     migrate.init_app(app, db)
 
