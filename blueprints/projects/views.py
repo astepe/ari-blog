@@ -6,9 +6,8 @@ from flask_wtf import FlaskForm
 from wtforms import BooleanField, SubmitField
 from flask_wtf.file import FileField, FileRequired
 import os
-from celery_worker import celery
+from blueprints import celery
 from celery.result import AsyncResult
-import time
 
 
 class SDSForm(FlaskForm):
@@ -27,37 +26,17 @@ class SDSForm(FlaskForm):
     submit = SubmitField('Submit')
 
 
-@celery.task
-def add_these(x, y):
-    time.sleep(4)
-    return x + y
-
-
-@projects.route('/ping_request', methods=['GET'])
-def ping_request():
-    worker = add_these.delay(1, 2)
-    return jsonify({'worker_id': worker.id})
-
-
 @projects.route('/celery_result', methods=['GET'])
 def celery_result():
 
     worker_id = request.args.get('worker_id')
 
     result = AsyncResult(worker_id)
-    print(result.state)
-    print(os.environ.get('REDIS_URL') or 'redis not found')
+
     if result.state == 'SUCCESS':
-        print(result.get())
         return jsonify({'data': result.get()})
     else:
-        print('not ready')
         return "not ready", 204
-
-
-@projects.route('/ping', methods=['GET'])
-def ping():
-    return render_template('ping.html')
 
 
 # view list of all projects
@@ -91,17 +70,14 @@ def submit_sds():
         temp_file = os.getcwd() + '/tempsds.pdf'
         form.sds_file.data.save(temp_file)
 
-        # celery task
-        # worker = get_sds_data.delay(temp_file, request_keys)
-        worker = add_these.delay(1, 2)
-
-        print(worker)
+        worker = get_sds_data.delay(temp_file, request_keys)
 
         return jsonify({'worker_id': worker.id})
 
     return render_template("sds_parser_form.html", form=form, chemical_data={})
 
 
+# currently not functioning
 @celery.task()
 def get_sds_data(temp_file, request_keys):
     sds_parser = SDSParser(request_keys=request_keys)
