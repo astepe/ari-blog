@@ -11,5 +11,5 @@ class Config(object):
     AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
     AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
     S3_BUCKET_NAME = os.environ.get('S3_BUCKET_NAME')
-    CELERY_BROKER_URL = os.environ.get('REDIS_URL') or 'redis://'
-    CELERY_RESULT_BACKEND = os.environ.get('REDIS_URL') or 'redis://'
+    BROKER_URL = os.environ.get('REDIS_URL') or 'redis://localhost/0'
+    CELERY_RESULT_BACKEND = os.environ.get('REDIS_URL') or 'redis://localhost/0'
