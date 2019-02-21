@@ -33,14 +33,14 @@ def celery_result():
     print('worker_id: ', worker_id)
     print(celery.conf.get('result_backend'))
 
-    result = AsyncResult(worker_id)
-    print('AsyncResult: ', result)
-    print(result.state)
+    with AsyncResult(worker_id) as result:
+        print('AsyncResult: ', result)
+        print(result.state)
 
-    if result.state == 'SUCCESS':
-        return jsonify({'data': result.get()})
-    else:
-        return "not ready", 204
+        if result.state == 'SUCCESS':
+            return jsonify({'data': result.get()})
+        else:
+            return "not ready", 204
 
 
 # view list of all projects
