@@ -16,9 +16,12 @@ function requestSDSData(event) {
 
   xhr.onload = function() {
     if(this.status == 200) {
-      let workerId = JSON.parse(this.responseText).worker_id;
-      longPollSDSDataResult(workerId);
-      displayResults(SDSDataResult.data);
+//       hold until heroku-redis functions
+//       let workerId = JSON.parse(this.responseText).worker_id;
+//       longPollSDSDataResult(workerId);
+//       displayResults(SDSDataResult.data);
+      let sds_data = JSON.parse(this.responseText).sds_data
+      displayResults(sds_data)
 
       let submit = document.getElementById("submit")
       window.scrollTo({
