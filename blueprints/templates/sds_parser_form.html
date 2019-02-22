@@ -80,7 +80,7 @@ function requestSDSDataResult(workerId) {
 <form onsubmit="event.preventDefault(); requestSDSData(event, );" method="POST" enctype='multipart/form-data'>
   {{form.hidden_tag()}}
 <h1 style="padding-top: 50px;">SDS Data Extractor</h1>
-  <h4>
+  <h3>
     SDSParser is an application for extracting chemical data from Safety Data Sheet documents. 
     SDSParser will speed up your data-entry process by eliminating the need to read through Safety Data Sheets to get the data you care about.
     For more information, visit the documentation page 
@@ -88,7 +88,7 @@ function requestSDSDataResult(workerId) {
       here
     </a>
     .
-  </h4>
+  </h3>
 <ol>
   <li style="color: #306998; font-weight: bold;">Select an SDS file for data extraction:</li>
     {{form.sds_file}}
