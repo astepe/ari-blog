@@ -74,9 +74,9 @@ def submit_sds():
         temp_file = os.getcwd() + '/tempsds.pdf'
         form.sds_file.data.save(temp_file)
 
-        worker = get_sds_data.delay(temp_file, request_keys)
+        sds_data = get_sds_data(temp_file, request_keys)
 
-        return jsonify({'worker_id': worker.id})
+        return jsonify({'sds_data': sds_data})
 
     return render_template("sds_parser_form.html", form=form, chemical_data={})
 

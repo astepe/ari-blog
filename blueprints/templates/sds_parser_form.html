@@ -16,9 +16,12 @@ function requestSDSData(event) {
 
   xhr.onload = function() {
     if(this.status == 200) {
-      let workerId = JSON.parse(this.responseText).worker_id;
-      longPollSDSDataResult(workerId);
-      displayResults(SDSDataResult.data);
+//       hold until heroku-redis functions
+//       let workerId = JSON.parse(this.responseText).worker_id;
+//       longPollSDSDataResult(workerId);
+//       displayResults(SDSDataResult.data);
+      let sds_data = JSON.parse(this.responseText).sds_data
+      displayResults(sds_data)
 
       let submit = document.getElementById("submit")
       window.scrollTo({
@@ -77,6 +80,15 @@ function requestSDSDataResult(workerId) {
 <form onsubmit="event.preventDefault(); requestSDSData(event, );" method="POST" enctype='multipart/form-data'>
   {{form.hidden_tag()}}
 <h1 style="padding-top: 50px;">SDS Data Extractor</h1>
+  <p>
+    SDSParser is an application for extracting chemical data from Safety Data Sheet documents. 
+    SDSParser will speed up your data-entry process by eliminating the need to read through Safety Data Sheets to get the data you care about.
+    For more information, visit the documentation page 
+    <a style="text-decoration: underline;" target="_blank" href="https://github.com/astepe/sds_parser">
+      here
+    </a>
+    .
+  </p>
 <ol>
   <li style="color: #306998; font-weight: bold;">Select an SDS file for data extraction:</li>
     {{form.sds_file}}
