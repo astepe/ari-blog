@@ -6,8 +6,6 @@ from flask_wtf import FlaskForm
 from wtforms import BooleanField, SubmitField
 from flask_wtf.file import FileField, FileRequired
 import os
-from blueprints import celery
-from celery.result import AsyncResult
 
 
 class SDSForm(FlaskForm):
@@ -24,23 +22,6 @@ class SDSForm(FlaskForm):
     revision_date = BooleanField('Revision Date')
     physical_state = BooleanField('Physical State')
     submit = SubmitField('Submit')
-
-
-@projects.route('/celery_result', methods=['GET'])
-def celery_result():
-
-    worker_id = request.args.get('worker_id')
-    print('worker_id: ', worker_id)
-    print(celery.conf.get('result_backend'))
-
-    with AsyncResult(worker_id) as result:
-        print('AsyncResult: ', result)
-        print(result.state)
-
-        if result.state == 'SUCCESS':
-            return jsonify({'data': result.get()})
-        else:
-            return "not ready", 204
 
 
 # view list of all projects
@@ -74,14 +55,9 @@ def submit_sds():
         temp_file = os.getcwd() + '/tempsds.pdf'
         form.sds_file.data.save(temp_file)
 
-        sds_data = get_sds_data(temp_file, request_keys)
+        sds_parser = SDSParser(request_keys=request_keys)
+        sds_data = sds_parser.get_sds_data(temp_file)
 
         return jsonify({'sds_data': sds_data})
 
     return render_template("sds_parser_form.html", form=form, chemical_data={})
-
-
-@celery.task()
-def get_sds_data(temp_file, request_keys):
-    sds_parser = SDSParser(request_keys=request_keys)
-    return sds_parser.get_sds_data(temp_file, request_keys)

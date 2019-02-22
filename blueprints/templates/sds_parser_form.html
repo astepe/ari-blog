@@ -16,10 +16,6 @@ function requestSDSData(event) {
 
   xhr.onload = function() {
     if(this.status == 200) {
-//       hold until heroku-redis functions
-//       let workerId = JSON.parse(this.responseText).worker_id;
-//       longPollSDSDataResult(workerId);
-//       displayResults(SDSDataResult.data);
       let sds_data = JSON.parse(this.responseText).sds_data
       displayResults(sds_data)
 
@@ -35,38 +31,6 @@ function requestSDSData(event) {
 
   xhr.send(formData);
 }
-function sleep(milliseconds) {
-  let start = new Date().getTime();
-  for (let i = 0; i < 1e7; i++) {
-    if ((new Date().getTime() - start) > milliseconds){
-      break;
-    }
-  }
-}
-
-
-function longPollSDSDataResult(workerId) {
-  while (SDSDataResult === undefined) {
-    requestSDSDataResult(workerId)
-    sleep(1000)
-  }
-}
-
-function requestSDSDataResult(workerId) {
-
-  let resultUrl = "{{url_for('projects.celery_result')}}"+ '?worker_id=' + workerId
-  let xhr = new XMLHttpRequest();
-
-  xhr.open('GET', resultUrl, false);
-  xhr.setRequestHeader("Content-Type", "application/json");
-
-  xhr.onload = function() {
-    if(this.status === 200) {
-      SDSDataResult = JSON.parse(this.responseText);
-    }
-  }
-  xhr.send();
-}
 
 </script>
 {% endblock %}
@@ -77,7 +41,7 @@ function requestSDSDataResult(workerId) {
 {% endblock %}
 
 {% block content %}
-<form onsubmit="event.preventDefault(); requestSDSData(event, );" method="POST" enctype='multipart/form-data'>
+<form onsubmit="event.preventDefault(); requestSDSData(event);" method="POST" enctype='multipart/form-data'>
   {{form.hidden_tag()}}
 <h1 style="padding-top: 50px;">SDSParser</h1>
   <p>
