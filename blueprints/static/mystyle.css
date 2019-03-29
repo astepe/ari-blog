@@ -35,7 +35,7 @@ a:hover {
   display: grid;
   grid-gap: 20px;
   grid-row-gap: 5px;
-  grid-template-rows: 75px 5px;
+  grid-template-rows: auto 5px;
   grid-template-columns: 2fr repeat(4, auto);
 }
 .navlink {
@@ -48,17 +48,22 @@ a:hover {
 .header {
   justify-content: left;
   align-items: center;
+  display: grid;
 }
 .header-title {
-  font-size: 20px;
+  font-size: 1px;
   font-family: courier new;
-  margin-bottom: 0;
+  margin-bottom: 0px;
+  margin-top: 0px;
+  height: 55px;
 }
 .header-subtitle {
   font-size: 15px;
   font-family: source sans pro,-apple-system,BlinkMacSystemFont,segoe ui,Roboto,helvetica neue,Arial,sans-serif,apple color emoji,segoe ui emoji,segoe ui symbol;
   color: #4B8BBE;
-  margin-top: .25rem;
+  margin-top: 10px;
+  margin-bottom: 0;
+  font-weight: bold;
 }
 .underline {
   display: grid;
@@ -179,4 +184,26 @@ body {
 body.fade {
     opacity: 0;
     transition: none;
+}
+#myname {
+  font-size: 50px;
+}
+form {
+  padding-top: 40px;
+  padding-left: 125px;
+  padding-right: 125px;
+}
+.category_output_list {
+  padding-left: 125px;
+  padding-right: 125px;
+}
+.category_output_list_item {
+  display: grid;
+  grid-template-columns: 300px 325px 200px;
+  justify-content: left;
+  align-items: center;
+  border-top: 5px dotted;
+  border-top-color: currentcolor;
+  border-radius: 3px;
+  border-color: #4B8BBE;
 }

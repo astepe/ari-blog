@@ -42,7 +42,7 @@ function displayResults(results) {
     var categoryItem = document.createElement('div');
     var h3 = document.createElement('h3');
     var h3Text = document.createTextNode(sds_data_titles[key] + ":");
-    categoryOutputList.className = "category_output_list";
+    categoryOutputList.className = "category_output_list_item";
     categoryItem.className = "category_item";
 
     h3.appendChild(h3Text);

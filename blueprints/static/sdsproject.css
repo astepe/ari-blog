@@ -38,9 +38,6 @@
   grid-template-columns: 300px 325px 200px;
   justify-content: left;
   align-items: center;
-  border-top: 5px dotted;
-  border-radius: 3px;
-  border-color: #4B8BBE;
 }
 .category_item {
   display: grid;
