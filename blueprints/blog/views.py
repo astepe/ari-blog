@@ -6,7 +6,7 @@ from blueprints.blog import blog
 @blog.route('/blog')
 def view_blog():
     posts = BlogPost.query.all()
-    posts.sort(key=lambda x: x.date)
+    posts.sort(key=lambda x: x.date, reverse=True)
     return render_template('blog.html', posts=posts)
 
 
