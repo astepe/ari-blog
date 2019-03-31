@@ -78,7 +78,7 @@ def update_blog_post(id):
         blogpost.body = data['body']
 
     if 'summary' in data:
-        blogpost.summary = data['summary']
+        blogpost.summary = data['summary'].strip()
 
     if 'image' in data:
         blogpost.image = data['image']
