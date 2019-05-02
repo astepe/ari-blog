@@ -8,22 +8,6 @@ from flask_wtf.file import FileField, FileRequired
 import os
 
 
-class SDSForm(FlaskForm):
-
-    sds_file = FileField(validators=[FileRequired()])
-    product_name = BooleanField('Product Name')
-    flash_point = BooleanField('Flash Point (°F)')
-    specific_gravity = BooleanField('Specific Gravity')
-    cas_number = BooleanField('CAS #')
-    nfpa_fire = BooleanField('NFPA Fire')
-    nfpa_health = BooleanField('NFPA Health')
-    nfpa_reactivity = BooleanField('NFPA Reactivity')
-    sara_311 = BooleanField('SARA 311/312')
-    revision_date = BooleanField('Revision Date')
-    physical_state = BooleanField('Physical State')
-    submit = SubmitField('Submit')
-
-
 # view list of all projects
 @projects.route('/projects', methods=['GET'])
 def view_projects():
@@ -56,8 +40,7 @@ def submit_sds():
         form.sds_file.data.save(temp_file)
 
         sds_parser = SDSParser(request_keys=request_keys)
-        sds_data = sds_parser.get_sds_data(temp_file,
-                                           extract_method='text')
+        sds_data = sds_parser.get_sds_data(temp_file)
 
         return jsonify({'sds_data': sds_data})
 
