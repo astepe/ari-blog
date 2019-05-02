@@ -1,7 +1,7 @@
-from flask import render_template, jsonify, abort, request
+from flask import render_template, jsonify, abort
 from blueprints.models import Project
 from blueprints.projects import projects
-from blueprints.projects.parser import SDSParser
+from sdsparser import SDSParser
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, SubmitField
 from flask_wtf.file import FileField, FileRequired
@@ -56,7 +56,8 @@ def submit_sds():
         form.sds_file.data.save(temp_file)
 
         sds_parser = SDSParser(request_keys=request_keys)
-        sds_data = sds_parser.get_sds_data(temp_file)
+        sds_data = sds_parser.get_sds_data(temp_file,
+                                           extract_method='text')
 
         return jsonify({'sds_data': sds_data})
 
