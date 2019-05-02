@@ -2,9 +2,7 @@ from flask import render_template, jsonify, abort
 from blueprints.models import Project
 from blueprints.projects import projects
 from sdsparser import SDSParser
-from flask_wtf import FlaskForm
-from wtforms import BooleanField, SubmitField
-from flask_wtf.file import FileField, FileRequired
+from .forms import SDSForm
 import os
 
 
